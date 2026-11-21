@@ -13,3 +13,4 @@ plugins/roslyn/bin/
 next-env.d.ts
 plugins/csharp/grammar/
 .qualis-ui/
+/release/

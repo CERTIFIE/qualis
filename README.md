@@ -27,6 +27,7 @@ It is built around three open contracts:
 - [Rules](#rules)
 - [Development](#development)
 - [Documentation site](#documentation-site)
+- [Releases](#releases)
 - [License](#license)
 
 ## Quick start
@@ -283,7 +284,18 @@ Requirements: Node.js 20.19 or later, pnpm 10, git (for new-code detection). Opt
 
 ## Documentation site
 
-`pnpm docs:build` generates a static site in `docs/site` (HTML + Tailwind CSS, light and dark themes, no runtime dependencies) from the rule metadata of the plugins and the published schemas; `pnpm docs:serve` serves it on http://localhost:4321 (`PORT` changes the port). The site also works when `docs/site/index.html` is opened directly.
+`pnpm docs:build` generates a static site in `docs/site` (HTML + Tailwind CSS, light and dark themes, no runtime dependencies) from the rule metadata of the plugins and the published schemas; `pnpm docs:serve` serves it on http://localhost:4321 (`PORT` changes the port). The site also works when `docs/site/index.html` is opened directly. The published documentation is at https://certifie.github.io/qualis/ (beta: https://certifie.github.io/qualis/beta/).
+
+## Releases
+
+The [pipeline](.github/workflows/pipeline.yml) runs the tests on every pull request and push, and publishes from two branches:
+
+| Branch | Version | Release | npm tag / image tag | Documentation |
+|---|---|---|---|---|
+| `master` | `version` of the root `package.json`, changed by hand | `vX.Y.Z`, latest | `latest` | https://certifie.github.io/qualis/ |
+| `beta` | `X.Y.Z-beta.<build number>` | `vX.Y.Z-beta.N`, prerelease | `beta` | https://certifie.github.io/qualis/beta/ |
+
+A release contains the `qualis` command with its dependencies (`qualis-X.Y.Z.tar.gz` / `.zip`), the npm tarballs, the documentation site and `SHA256SUMS.txt`. The npm packages are published on GitHub Packages as `@certifie/qualis`, `@certifie/qualis-core`, ... (GitHub Packages requires the owner's scope; the dependencies between them are npm aliases of `@qualis/*`), and the web UI as the `ghcr.io/certifie/qualis-ui` image. On `master`, when the tag of the current version already exists, nothing is published: bump `version` in `package.json` to release. `node scripts/release/version.mjs` and `node scripts/release/pack.mjs` reproduce the version and the packages locally (output in `release/`).
 
 ## License
 

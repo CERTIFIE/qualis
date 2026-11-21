@@ -1,0 +1,312 @@
+# Tests, packages, release and documentation of Qualis.
+#
+#   master (or main)  official release: version from package.json (changed by hand), tag vX.Y.Z,
+#                     npm tag "latest", image tag "latest", documentation at the root of GitHub Pages.
+#                     When the tag vX.Y.Z already exists (version not changed), nothing is published:
+#                     the tests run and the documentation is deployed again.
+#   beta              beta release on every push: version X.Y.Z-beta.<build number>, prerelease,
+#                     npm tag "beta", image tag "beta", documentation under /beta/ on GitHub Pages.
+#   pull requests     tests, plus a dry run of the packages, the documentation and the image (nothing is published).
+name: pipeline
+
+on:
+  push:
+    branches: [master, main, beta]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: pipeline-${{ github.ref }}
+  # A release must not be interrupted halfway; pull requests only keep the latest run.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "22"
+  DOTNET_VERSION: "10.0.x"
+  # The .NET helper of the Roslyn rule pack is built once and shipped in @qualis/plugin-roslyn.
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  DOTNET_NOLOGO: "1"
+
+jobs:
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # the new-code tests use git history
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+
+  version:
+    name: Version
+    runs-on: ubuntu-latest
+    outputs:
+      channel: ${{ steps.channel.outputs.channel }}
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+      publish: ${{ steps.publish.outputs.publish }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: channel
+        run: |
+          if [ "$GITHUB_REF_NAME" = "beta" ] || [ "$GITHUB_BASE_REF" = "beta" ]; then
+            echo "channel=beta" >> "$GITHUB_OUTPUT"
+          else
+            echo "channel=stable" >> "$GITHUB_OUTPUT"
+          fi
+      - id: version
+        run: node scripts/release/version.mjs --channel "${{ steps.channel.outputs.channel }}" --build "${{ github.run_number }}"
+      - id: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            echo "Pull request: dry run, nothing is published."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          elif [[ ! "$GITHUB_REF_NAME" =~ ^(master|main|beta)$ ]]; then
+            echo "::notice::Only master, main and beta publish releases: $GITHUB_REF_NAME is a dry run."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          elif gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "::notice::Release $TAG already exists: change the version in package.json to publish a new release."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    name: Packages and documentation
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - run: pnpm install --frozen-lockfile
+      - name: Set version ${{ needs.version.outputs.version }}
+        run: node scripts/release/version.mjs --channel "${{ needs.version.outputs.channel }}" --build "${{ github.run_number }}" --apply
+      - run: pnpm build
+      - name: Documentation
+        env:
+          QUALIS_CHANNEL: ${{ needs.version.outputs.channel }}
+          QUALIS_SOURCE_REF: ${{ github.sha }}
+        run: pnpm --filter @qualis/docs build
+      - name: Pack
+        run: node scripts/release/pack.mjs --repo "$GITHUB_REPOSITORY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release
+          path: release/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docs-site
+          path: docs/site/
+          if-no-files-found: error
+
+  image:
+    name: Web UI image
+    needs: [version, build]
+    # Built on pull requests to check the Dockerfile, pushed only with a release.
+    if: github.event_name == 'pull_request' || needs.version.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set version ${{ needs.version.outputs.version }}
+        run: node scripts/release/version.mjs --channel "${{ needs.version.outputs.channel }}" --build "${{ github.run_number }}" --apply
+      - uses: actions/download-artifact@v4
+        with:
+          name: docs-site
+          path: docs/site
+      - id: meta
+        env:
+          CHANNEL: ${{ needs.version.outputs.channel }}
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          image="ghcr.io/${GITHUB_REPOSITORY,,}-ui"
+          if [ "$CHANNEL" = "beta" ]; then moving=beta; else moving=latest; fi
+          echo "tags=$image:$VERSION,$image:$moving" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - if: needs.version.outputs.publish == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/ui/Dockerfile
+          push: ${{ needs.version.outputs.publish == 'true' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.version=${{ needs.version.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.title=Qualis web UI
+            org.opencontainers.image.licenses=Apache-2.0
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  npm:
+    name: GitHub Packages (npm)
+    needs: [version, test, build]
+    if: needs.version.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: release
+          path: release
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: https://npm.pkg.github.com
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+          NPM_TAG: ${{ needs.version.outputs.channel == 'beta' && 'beta' || 'latest' }}
+        run: |
+          for tgz in release/npm/*.tgz; do
+            id=$(tar -xzOf "$tgz" package/package.json | node -p 'const p = JSON.parse(require("fs").readFileSync(0, "utf8")); `${p.name}@${p.version}`')
+            # A re-run after a partial failure skips the versions already published.
+            if npm view "$id" version > /dev/null 2>&1; then
+              echo "$id already published"
+            else
+              echo "Publishing $id ($NPM_TAG)"
+              npm publish "$tgz" --tag "$NPM_TAG"
+            fi
+          done
+
+  release:
+    name: GitHub Release
+    needs: [version, test, build, image, npm]
+    if: needs.version.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: release
+          path: release
+      - name: Create ${{ needs.version.outputs.tag }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.version.outputs.tag }}
+          VERSION: ${{ needs.version.outputs.version }}
+          CHANNEL: ${{ needs.version.outputs.channel }}
+        run: |
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          repo="${GITHUB_REPOSITORY#*/}"
+          if [ "$CHANNEL" = "beta" ]; then
+            flags=(--prerelease --latest=false)
+            docs="https://$owner.github.io/$repo/beta/"
+            npmtag="@beta"
+            title="Qualis $VERSION (beta)"
+          else
+            flags=(--latest)
+            docs="https://$owner.github.io/$repo/"
+            npmtag=""
+            title="Qualis $VERSION"
+          fi
+          cat > notes.md <<EOF
+          ## Download
+
+          - \`qualis-$VERSION.tar.gz\` (macOS, Linux) or \`qualis-$VERSION.zip\` (Windows): the \`qualis\` command with all its dependencies. Requires Node.js 20.19+; .NET SDK 10 enables the Roslyn rule pack.
+          - npm packages on GitHub Packages: \`npm install --save-dev @$owner/qualis$npmtag\` (registry \`https://npm.pkg.github.com\`, see the [installation guide](${docs}installation.html)).
+          - Web UI image: \`docker pull ghcr.io/${GITHUB_REPOSITORY,,}-ui:$VERSION\`
+          - Documentation: $docs
+          - Checksums: \`SHA256SUMS.txt\`
+
+          EOF
+          gh release create "$TAG" release/assets/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "$title" \
+            --notes-file notes.md \
+            --generate-notes \
+            "${flags[@]}"
+
+  pages:
+    name: GitHub Pages
+    needs: [version, test, build, release]
+    # Also when the release was skipped (master without a version change): the documentation is still deployed.
+    if: >-
+      always() && github.event_name != 'pull_request'
+      && needs.test.result == 'success' && needs.build.result == 'success'
+      && contains(fromJSON('["master", "main", "beta"]'), github.ref_name)
+      && (needs.release.result == 'success' || needs.version.outputs.publish != 'true')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: docs-site
+          path: current
+      - name: Compose stable (root) and beta (/beta/) documentation
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CHANNEL: ${{ needs.version.outputs.channel }}
+        run: |
+          # The web UI copy of the pages is not part of the static site.
+          rm -rf current/app
+          mkdir -p site
+          # Documentation of the other channel, from its latest release.
+          fetch() { # $1 = prerelease true|false, $2 = target folder
+            tag=$(gh release list --repo "$GITHUB_REPOSITORY" --limit 100 --json tagName,isPrerelease,isDraft \
+              --jq "[.[] | select(.isDraft | not) | select(.isPrerelease == $1)][0].tagName // empty")
+            [ -n "$tag" ] || return 1
+            gh release download "$tag" --repo "$GITHUB_REPOSITORY" --pattern 'qualis-docs-*.zip' --dir "dl-$1" || return 1
+            mkdir -p "$2" && unzip -q -o dl-$1/qualis-docs-*.zip -d "$2"
+            echo "Documentation of $tag -> $2"
+          }
+          if [ "$CHANNEL" = "beta" ]; then
+            cp -R current site/beta
+            # No official release yet: the beta documentation is also shown at the root.
+            fetch false site || cp -R current/. site/
+          else
+            cp -R current/. site/
+            fetch true site/beta || true
+          fi
+          touch site/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4
