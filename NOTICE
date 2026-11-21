@@ -14,8 +14,8 @@ copy of this NOTICE file. Please keep the paragraph above, with the name
 "Qualis" and the link to the project, in the NOTICE of your work and, where
 your product shows third-party notices, among them.
 
-The name "Qualis" is not licensed by the Apache License (section 6). See
-TRADEMARKS.md for how the name may be used, including by forks.
+Forks and derived works may use any name. What must stay is the credit to the
+project: the notices above and a link to https://github.com/CERTIFIE/qualis.
 
 Qualis is an independent project. It is not affiliated with, endorsed by or
 derived from SonarSource or any other vendor of code analysis products.

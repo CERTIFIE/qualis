@@ -113,12 +113,12 @@ Every rule must have at least one reference to a published authority (the langua
 
 ### Where to publish it
 
-- **In your own repository**: you own it and choose its license; Qualis loads any npm package or executable. Name it, for example, `qualis-plugin-<language>`, say that it is a plugin for Qualis, and open an issue so that we can list it in the documentation. See [TRADEMARKS.md](TRADEMARKS.md) for the use of the name.
+- **In your own repository**: you own it and choose its license; Qualis loads any npm package or executable. Name it, for example, `qualis-plugin-<language>`, say that it is a plugin for Qualis, and open an issue so that we can list it in the documentation.
 - **In this repository**: add it under `plugins/<name>` with its own `package.json` (`"license": "Apache-2.0"`), `tsconfig.json` and `test/`, add it to the references of the root `tsconfig.json`, and propose it in a pull request. Plugins bundled by default are listed in `packages/core/src/config.ts`, and the documentation site reads their rules through `docs/package.json`. Open an issue first to discuss a new bundled plugin.
 
 ## Forks
 
-You are free to fork Qualis. A redistributed fork must keep the [LICENSE](LICENSE) and the [NOTICE](NOTICE), with the credit to Qualis, and a modified fork needs its own product name: see [TRADEMARKS.md](TRADEMARKS.md). If your fork fixes something, a pull request back here helps everyone.
+You are free to fork Qualis and to give your fork any name. A redistributed fork must keep the [LICENSE](LICENSE) and the [NOTICE](NOTICE), with the credit to Qualis and the link to this project, and must state in the files it changed that they were changed. If your fork fixes something, a pull request back here helps everyone.
 
 ## Security
 

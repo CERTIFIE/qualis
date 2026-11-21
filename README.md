@@ -306,6 +306,6 @@ Qualis is free and open source: anyone can fork it, help maintain and develop it
 
 Qualis is licensed under the [Apache License 2.0](LICENSE). You may use, modify, fork and redistribute it, also in commercial and closed-source products, and plugins may use any license.
 
-When you redistribute Qualis or a work based on it, keep the copyright notices and include the [LICENSE](LICENSE) and the [NOTICE](NOTICE) file, which credits Qualis and links to this project. The license does not grant the use of the Qualis name: a modified fork needs its own name, and may say that it is "based on Qualis". See [TRADEMARKS.md](TRADEMARKS.md).
+When you redistribute Qualis or a work based on it, such as a fork, keep the copyright notices and include the [LICENSE](LICENSE) and the [NOTICE](NOTICE) file, which credits Qualis and links to this project. A fork may use any name, as long as the credit to Qualis stays.
 
 Qualis is an independent project and is not affiliated with any vendor of code analysis products. Bundled third-party components keep their own licenses, listed in [NOTICE](NOTICE).
