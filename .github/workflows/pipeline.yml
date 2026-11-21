@@ -310,6 +310,8 @@ jobs:
   pages:
     name: GitHub Pages
     needs: pages-build
+    # Without always() the job inherits the skip of release (no new version on master), even when the site was built.
+    if: always() && needs.pages-build.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       pages: write
