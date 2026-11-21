@@ -3,6 +3,20 @@ Copyright 2026 The Qualis Authors
 
 This product is licensed under the Apache License, Version 2.0 (see LICENSE).
 
+This product includes Qualis, developed by The Qualis Authors:
+https://github.com/CERTIFIE/qualis
+
+Attribution notice for redistributors. Under section 4 of the Apache License,
+anyone who redistributes Qualis or a work derived from it (a fork, a modified
+version, or a product that bundles it) must keep the copyright, patent,
+trademark and attribution notices of the source, and must include a readable
+copy of this NOTICE file. Please keep the paragraph above, with the name
+"Qualis" and the link to the project, in the NOTICE of your work and, where
+your product shows third-party notices, among them.
+
+The name "Qualis" is not licensed by the Apache License (section 6). See
+TRADEMARKS.md for how the name may be used, including by forks.
+
 Qualis is an independent project. It is not affiliated with, endorsed by or
 derived from SonarSource or any other vendor of code analysis products.
 

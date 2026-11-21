@@ -39,6 +39,11 @@ COPY --from=build --chown=qualis:qualis /repo/apps/ui/.next/standalone ./
 COPY --from=build --chown=qualis:qualis /repo/apps/ui/.next/static ./apps/ui/.next/static
 COPY --from=build --chown=qualis:qualis /repo/apps/ui/public ./apps/ui/public
 COPY --chown=qualis:qualis docs/site/app ./docs
+# Apache-2.0 section 4: the image carries the license and the attribution notices.
+COPY --chown=qualis:qualis LICENSE NOTICE ./
+LABEL org.opencontainers.image.title="Qualis UI" \
+      org.opencontainers.image.source="https://github.com/CERTIFIE/qualis" \
+      org.opencontainers.image.licenses="Apache-2.0"
 USER qualis
 VOLUME ["/data"]
 EXPOSE 3000

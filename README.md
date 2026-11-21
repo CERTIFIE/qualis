@@ -28,6 +28,7 @@ It is built around three open contracts:
 - [Development](#development)
 - [Documentation site](#documentation-site)
 - [Releases](#releases)
+- [Contributing](#contributing)
 - [License](#license)
 
 ## Quick start
@@ -297,6 +298,14 @@ The [pipeline](.github/workflows/pipeline.yml) runs the tests on every pull requ
 
 A release contains the `qualis` command with its dependencies (`qualis-X.Y.Z.tar.gz` / `.zip`), the npm tarballs, the documentation site and `SHA256SUMS.txt`. The npm packages are published on GitHub Packages as `@certifie/qualis`, `@certifie/qualis-core`, ... (GitHub Packages requires the owner's scope; the dependencies between them are npm aliases of `@qualis/*`), and the web UI as the `ghcr.io/certifie/qualis-ui` image. On `master`, when the tag of the current version already exists, nothing is published: bump `version` in `package.json` to release. `node scripts/release/version.mjs` and `node scripts/release/pack.mjs` reproduce the version and the packages locally (output in `release/`).
 
+## Contributing
+
+Qualis is free and open source: anyone can fork it, help maintain and develop it, and add new plugins. [CONTRIBUTING.md](CONTRIBUTING.md) explains how to set up the repository, open a pull request and write a plugin, in this repository or in your own.
+
 ## License
 
-Apache License 2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE). Qualis is an independent project and is not affiliated with any vendor of code analysis products.
+Qualis is licensed under the [Apache License 2.0](LICENSE). You may use, modify, fork and redistribute it, also in commercial and closed-source products, and plugins may use any license.
+
+When you redistribute Qualis or a work based on it, keep the copyright notices and include the [LICENSE](LICENSE) and the [NOTICE](NOTICE) file, which credits Qualis and links to this project. The license does not grant the use of the Qualis name: a modified fork needs its own name, and may say that it is "based on Qualis". See [TRADEMARKS.md](TRADEMARKS.md).
+
+Qualis is an independent project and is not affiliated with any vendor of code analysis products. Bundled third-party components keep their own licenses, listed in [NOTICE](NOTICE).
