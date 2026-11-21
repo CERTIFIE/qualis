@@ -156,6 +156,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
       - uses: docker/build-push-action@v6
+        env:
+          # No build record artifact in the run: only the release, the site and the Pages artifact.
+          DOCKER_BUILD_RECORD_UPLOAD: "false"
         with:
           context: .
           file: apps/ui/Dockerfile
@@ -253,8 +256,8 @@ jobs:
             --generate-notes \
             "${flags[@]}"
 
-  pages:
-    name: GitHub Pages
+  pages-build:
+    name: GitHub Pages (site)
     needs: [version, test, build, release]
     # Also when the release was skipped (master without a version change): the documentation is still deployed.
     if: >-
@@ -265,14 +268,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
-    concurrency:
-      group: pages
-      cancel-in-progress: false
+      pages: read
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -308,5 +304,22 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
+
+  # Deployed by its own job, as in GitHub's Pages starter workflows: deploy-pages looks up the "github-pages"
+  # artifact of the run, which may not be listed yet when it runs in the same job right after the upload.
+  pages:
+    name: GitHub Pages
+    needs: pages-build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
       - id: deploy
         uses: actions/deploy-pages@v4
