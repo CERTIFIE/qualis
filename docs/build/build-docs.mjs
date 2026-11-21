@@ -21,6 +21,23 @@ const APP = path.join(OUT, "app");
 const CONTENT = path.join(DOCS, "content");
 const VERSION = JSON.parse(await readFile(path.join(DOCS, "package.json"), "utf8")).version;
 
+// Where the code and the downloads live. The release pipeline sets these; a local build links the main repository.
+const REPOSITORY = process.env.QUALIS_REPOSITORY ?? process.env.GITHUB_REPOSITORY ?? "CERTIFIE/qualis";
+const [REPO_OWNER, REPO_NAME] = REPOSITORY.split("/");
+const REPO_URL = `https://github.com/${REPOSITORY}`;
+/** stable (master), beta, or dev for a local build that is not a release. */
+const CHANNEL = process.env.QUALIS_CHANNEL ?? "dev";
+/** Commit or branch the "source" links point to. */
+const SOURCE_REF = process.env.QUALIS_SOURCE_REF ?? process.env.GITHUB_SHA ?? "main";
+const RELEASE_TAG = `v${VERSION}`;
+const RELEASE_URL = CHANNEL === "dev" ? `${REPO_URL}/releases` : `${REPO_URL}/releases/tag/${RELEASE_TAG}`;
+const DOWNLOAD_URL = `${REPO_URL}/releases/download/${RELEASE_TAG}`;
+const NPM_SCOPE = `@${REPO_OWNER.toLowerCase()}`;
+const SITE_URL = `https://${REPO_OWNER.toLowerCase()}.github.io/${REPO_NAME}/`;
+const VERSION_LABEL = CHANNEL === "beta" ? `${VERSION} (beta)` : CHANNEL === "dev" ? `${VERSION} (development)` : VERSION;
+const sourceUrl = (file) => `${REPO_URL}/blob/${SOURCE_REF}/${file}`;
+const treeUrl = (dir) => `${REPO_URL}/tree/${SOURCE_REF}/${dir}`;
+
 // ---------------------------------------------------------------------------
 // Data
 // ---------------------------------------------------------------------------
@@ -214,7 +231,7 @@ function codeBlock(items) {
 // Page shell
 // ---------------------------------------------------------------------------
 
-function layout({ slug, title, description, body, toc = [], markdown = "", wide = false }) {
+function layout({ slug, title, description, body, toc = [], markdown = "", wide = false, source }) {
   const depth = slug.split("/").length - 1;
   const base = "../".repeat(depth);
   const href = (target) => `${base}${target}.html`;
@@ -271,6 +288,8 @@ function layout({ slug, title, description, body, toc = [], markdown = "", wide 
     <a href="${href("index")}" class="flex items-center gap-2" aria-label="Qualis home">${icon("shield-check", "size-6 text-accent")}<span class="font-mono text-[14px] font-medium uppercase tracking-[0.12em]">Qualis</span></a>
     <nav class="hidden items-center gap-5 md:flex" aria-label="Main">${topNav}</nav>
     <div class="ml-auto flex items-center gap-3">
+      <a href="${RELEASE_URL}" class="label hidden text-faint hover:text-fg sm:inline">Download</a>
+      <a href="${REPO_URL}" class="p-1.5 text-muted hover:text-fg" aria-label="Source code on GitHub">${icon("brand-github", "size-[18px]")}</a>
       <button type="button" data-search-open class="flex w-9 items-center gap-2 border border-line px-2.5 py-1.5 text-[13px] text-faint hover:border-line-strong sm:w-56" aria-label="Search">${icon("search", "icon")}<span class="hidden sm:inline">Search</span><span class="label ml-auto hidden sm:inline">⌘K</span></button>
       <button type="button" data-theme-toggle class="p-1.5 text-muted hover:text-fg" aria-label="Toggle theme">
         <span class="hidden dark:inline">${icon("sun", "size-[18px]")}</span><span class="dark:hidden">${icon("moon", "size-[18px]")}</span>
@@ -280,7 +299,8 @@ function layout({ slug, title, description, body, toc = [], markdown = "", wide 
 </header>
 <div class="mx-auto flex max-w-[1400px]">
   <aside id="sidebar" class="hidden w-full shrink-0 border-r border-line px-3 py-6 lg:sticky lg:top-14 lg:block lg:h-[calc(100vh-3.5rem)] lg:w-64 lg:overflow-y-auto">
-    <div class="label mb-4 px-2 text-faint">Version ${VERSION}</div>
+    <div class="label mb-4 px-2 text-faint">Version ${esc(VERSION_LABEL)}</div>
+    ${CHANNEL === "beta" ? `<a class="nav-link mb-4" href="${SITE_URL}">Stable documentation</a>` : ""}
     ${sidebar}
   </aside>
   <main id="content" class="min-w-0 flex-1 px-4 py-8 sm:px-8 lg:px-12">
@@ -293,7 +313,7 @@ function layout({ slug, title, description, body, toc = [], markdown = "", wide 
       ${description ? `<p class="mt-2 text-[16px] text-muted">${esc(description)}</p>` : ""}
       <div class="prose mt-8">${body}</div>
       ${pager}
-      <footer class="mt-12 border-t border-line pt-6 text-[12.5px] text-faint">Qualis ${VERSION} · Apache-2.0 · Icons by Tabler (MIT)</footer>
+      <footer class="mt-12 border-t border-line pt-6 text-[12.5px] text-faint">Qualis ${esc(VERSION_LABEL)} · <a class="hover:text-fg" href="${RELEASE_URL}">Download</a> · <a class="hover:text-fg" href="${source ?? REPO_URL}">${source ? "View source" : "Source code"}</a> · Apache-2.0 · Icons by Tabler (MIT)</footer>
     </div>
   </main>
   <aside class="hidden w-56 shrink-0 py-8 pr-6 xl:block"><div class="sticky top-22">${tocHtml}</div></aside>
@@ -387,7 +407,7 @@ function ruleMarkdown(rule) {
   md += `## Sources\n\n| Publisher | Source |\n|---|---|\n`;
   for (const ref of rule.references) md += `| ${ref.publisher} | [${ref.id ? `${ref.id}: ` : ""}${ref.title}](${ref.url}) |\n`;
   if (rule.supersedes?.length) md += `\nWhen enabled, this rule replaces ${rule.supersedes.map((id) => { const target = allRules.find((r) => r.id === id); return target ? ruleLink(target, from) : `\`${id}\``; }).join(", ")} (see [rule packs](${up}plugins.html#language-plugins-and-rule-packs)).\n`;
-  md += `\nImplemented by the ${rule.plugin.name} plugin (\`${rule.plugin.id}\` ${rule.plugin.version}), rule key \`${key}\`.\n`;
+  md += `\nImplemented by the ${rule.plugin.name} plugin (\`${rule.plugin.id}\` ${rule.plugin.version}, [source code](${treeUrl(`plugins/${rule.plugin.id}`)})), rule key \`${key}\`.\n`;
   return md;
 }
 
@@ -416,7 +436,32 @@ function catalogHtml() {
 </div>`;
 }
 
+/** Download table of the release this site documents (docs/content/installation.md). */
+function downloadsMarkdown() {
+  if (CHANNEL === "dev") {
+    return `This documentation was built from a local checkout: the downloads are on the [releases page](${RELEASE_URL}).\n`;
+  }
+  const files = [
+    [`qualis-${VERSION}.tar.gz`, "The `qualis` command with all its dependencies (macOS, Linux)."],
+    [`qualis-${VERSION}.zip`, "The same, as a zip archive (Windows)."],
+    [`qualis-docs-${VERSION}.zip`, "This documentation, as a static site."],
+    ["SHA256SUMS.txt", "SHA-256 checksums of every file of the release."],
+  ];
+  return `| File | Content |\n|---|---|\n${files.map(([f, d]) => `| [${f}](${DOWNLOAD_URL}/${f}) | ${d} |`).join("\n")}\n\nAll the files, the npm packages and the release notes are on the [release ${RELEASE_TAG} page](${RELEASE_URL}).\n`;
+}
+
 const PLACEHOLDERS = {
+  version: () => VERSION,
+  "release-tag": () => RELEASE_TAG,
+  "release-url": () => RELEASE_URL,
+  "download-url": () => DOWNLOAD_URL,
+  downloads: downloadsMarkdown,
+  "repo-url": () => REPO_URL,
+  "tree-url": () => `${REPO_URL}/tree/${SOURCE_REF}`,
+  "ui-image": () => `ghcr.io/${REPOSITORY.toLowerCase()}-ui`,
+  "npm-scope": () => NPM_SCOPE,
+  "npm-tag": () => (CHANNEL === "beta" ? "@beta" : ""),
+  "site-url": () => SITE_URL,
   "rule-count": () => String(allRules.length),
   "source-count": () => String(new Set(allRules.flatMap((r) => r.references.map((x) => x.url))).size),
   sources: sourcesMarkdown,
@@ -481,7 +526,7 @@ for (const file of (await readdir(CONTENT)).filter((f) => f.endsWith(".md"))) {
     return PLACEHOLDERS[name]();
   });
   const { html, toc } = renderMarkdown(markdown);
-  await emit(slug, { title: data.title, description: data.description, body: html, toc, markdown: `# ${data.title}\n\n${markdown}` });
+  await emit(slug, { title: data.title, description: data.description, body: html, toc, markdown: `# ${data.title}\n\n${markdown}`, source: sourceUrl(`docs/content/${file}`) });
   search.push({ kind: "page", section: groupOf(slug), title: data.title, url: `${slug}.html`, text: `${data.description ?? ""} ${toc.map((t) => t.text).join(" · ")}` });
 }
 
@@ -490,7 +535,7 @@ for (const rule of allRules) {
   const slug = ruleUrl(rule).replace(/\.html$/, "");
   const markdown = ruleMarkdown(rule);
   const { html, toc } = renderMarkdown(markdown);
-  await emit(slug, { title: rule.name, description: `${TYPE_LABEL[rule.type]} rule of the ${rule.plugin.name} plugin.`, body: html, toc, markdown: `# ${rule.name}\n\n${markdown}` });
+  await emit(slug, { title: rule.name, description: `${TYPE_LABEL[rule.type]} rule of the ${rule.plugin.name} plugin.`, body: html, toc, markdown: `# ${rule.name}\n\n${markdown}`, source: treeUrl(`plugins/${rule.plugin.id}`) });
   search.push({ kind: "rule", section: "Rule", title: rule.name, url: `${slug}.html`, text: `${rule.id} ${rule.tags.join(" ")} ${rule.description}` });
 }
 
