@@ -1,0 +1,15 @@
+# Keep the Docker build context small: dependencies and build output are recreated inside the image.
+**/node_modules
+**/.next
+**/dist
+**/*.tsbuildinfo
+.git
+.qualis
+coverage
+# The static site; its app/ folder holds the pages the web UI shows (pnpm docs:build first).
+docs/site/*
+!docs/site/app
+plugins/roslyn/bin
+**/dotnet/bin
+**/dotnet/obj
+.DS_Store

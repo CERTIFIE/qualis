@@ -1,0 +1,31 @@
+{
+  "name": "@qualis/plugin-roslyn",
+  "version": "0.1.0",
+  "description": "Qualis rule pack running the Microsoft .NET code analysis rules (CA) with Roslyn, out of process over the stdio protocol.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "bin"
+  ],
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "build:dotnet": "node scripts/build-dotnet.mjs"
+  },
+  "dependencies": {
+    "@qualis/plugin-api": "workspace:*"
+  },
+  "devDependencies": {
+    "@qualis/core": "workspace:*"
+  }
+}

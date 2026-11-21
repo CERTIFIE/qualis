@@ -1,0 +1,17 @@
+Qualis
+Copyright 2026 The Qualis Authors
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Qualis is an independent project. It is not affiliated with, endorsed by or
+derived from SonarSource or any other vendor of code analysis products.
+
+Bundled third-party components keep their own licenses:
+- TypeScript compiler (Apache-2.0) - used by @qualis/plugin-typescript and @qualis/plugin-eslint
+- web-tree-sitter (MIT) and the tree-sitter-c-sharp grammar (MIT, shipped as WebAssembly in
+  @qualis/plugin-csharp/grammar with its license) - used by @qualis/plugin-csharp
+- ESLint, @eslint/js, typescript-eslint and globals (MIT) - used by @qualis/plugin-eslint;
+  rule descriptions are taken from their rule metadata
+- Roslyn (Microsoft.CodeAnalysis.*) and Microsoft.CodeAnalysis.NetAnalyzers (MIT) - used by
+  @qualis/plugin-roslyn; rule titles and descriptions come from the analyzers' metadata
+- Tabler Icons (MIT) - icons of the documentation site

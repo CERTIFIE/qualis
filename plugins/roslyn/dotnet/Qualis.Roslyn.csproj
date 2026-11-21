@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RollForward>Major</RollForward>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Qualis.Roslyn</AssemblyName>
+    <Version>0.1.0</Version>
+    <RootNamespace>Qualis.Roslyn</RootNamespace>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <!-- The analyzers are loaded at run time, not used to analyze this project. -->
+    <EnableNETAnalyzers>false</EnableNETAnalyzers>
+    <!-- The out-of-process MSBuild build host of the workspace targets .NET Framework too. -->
+    <NoWarn>$(NoWarn);NU1701</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="5.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.403" GeneratePathProperty="true" IncludeAssets="none" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- Ship the Microsoft code analysis rules (CA) next to the executable. -->
+  <ItemGroup>
+    <None Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/analyzers/dotnet/cs/*.dll" Link="analyzers/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <!-- Microsoft's "Recommended" analysis mode: the default rule profile of the pack. -->
+    <None Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/buildTransitive/config/analysislevel_10_recommended.globalconfig" Link="analyzers/recommended.globalconfig" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,349 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:qualis:schema:config:1",
+  "title": "Qualis configuration (qualis.config.json)",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "include": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Glob patterns of files to analyse (default: everything)."
+    },
+    "exclude": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Glob patterns of files to skip, added to the built-in exclusions."
+    },
+    "respectGitignore": {
+      "type": "boolean",
+      "default": true
+    },
+    "plugins": {
+      "type": "array",
+      "description": "Language plugins. Replaces the default list (bundled TypeScript/JavaScript and C# plugins).",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string",
+            "minLength": 1
+          },
+          {
+            "type": "object",
+            "required": [
+              "module"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "module": {
+                "type": "string",
+                "minLength": 1
+              },
+              "options": {
+                "type": "object"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "command"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "command": {
+                "type": "string",
+                "minLength": 1
+              },
+              "args": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "cwd": {
+                "type": "string"
+              },
+              "env": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "options": {
+                "type": "object"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "rules": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^([a-z][a-z0-9-]*:[a-z0-9][a-z0-9-]*|external:[a-z0-9][a-z0-9._-]*:.+)$"
+      },
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "enum": [
+              "off",
+              "on",
+              "blocker",
+              "critical",
+              "major",
+              "minor",
+              "info"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "severity": {
+                "$ref": "urn:qualis:schema:common:1#/$defs/Severity"
+              },
+              "params": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": [
+                    "number",
+                    "string",
+                    "boolean"
+                  ]
+                }
+              },
+              "exclude": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Glob patterns of files where the rule does not apply."
+              },
+              "scope": {
+                "$ref": "urn:qualis:schema:common:1#/$defs/RuleScope",
+                "description": "Code the rule applies to: `main`, `test` or `all`. Overrides the rule's default."
+              }
+            }
+          }
+        ]
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "reports": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Glob patterns of LCOV, Cobertura XML or OpenCover XML reports."
+        },
+        "missingFiles": {
+          "enum": [
+            "uncovered",
+            "ignore"
+          ],
+          "default": "uncovered",
+          "description": "Source files that no coverage report mentions: count their lines of code as not covered (for languages present in the reports), or ignore them."
+        },
+        "exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Glob patterns of files not expected to be covered, in addition to the test code (`tests.sources`). Replaces the default list (declaration and configuration files)."
+        }
+      }
+    },
+    "tests": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "reports": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Glob patterns of JUnit XML or TRX reports."
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Glob patterns of test code. Test files are analysed and listed, but excluded from size, complexity, duplication and coverage measures; rules apply to them according to their scope. Replaces the default list."
+        }
+      }
+    },
+    "externalIssues": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Issues reported by other linters and analyzers, imported from their report files.",
+      "properties": {
+        "reports": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Glob patterns of SARIF 2.1.0 or ESLint JSON (`eslint -f json`) reports."
+        },
+        "types": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "urn:qualis:schema:common:1#/$defs/IssueType"
+          },
+          "description": "Issue type per external rule id (`external:<tool>:<rule>`); `*` matches any text. Rules not listed are code smells, or security hotspots when the tool tags them as security findings."
+        },
+        "effortMinutes": {
+          "type": "number",
+          "minimum": 0,
+          "default": 5,
+          "description": "Remediation effort of one external issue, in minutes."
+        },
+        "dotnetErrorLogs": {
+          "type": "boolean",
+          "default": true,
+          "description": "Import the build error log (SARIF) of each .NET project: the `ErrorLog` declared in the project file or its Directory.Build.props, otherwise the *.sarif files of the project folder. Only the compiler runs are read, and only for the files of that project."
+        }
+      }
+    },
+    "duplication": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "minTokens": {
+          "type": "integer",
+          "minimum": 10,
+          "default": 100
+        },
+        "minLines": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 10
+        },
+        "exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "newCode": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "reference": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": "auto"
+        }
+      }
+    },
+    "qualityGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:qualis:schema:common:1#/$defs/GateCondition"
+          }
+        }
+      }
+    },
+    "ratings": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "developmentCostMinutesPerLine": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 30
+        },
+        "maintainabilityThresholds": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "default": [
+            5,
+            10,
+            20,
+            50
+          ]
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dir": {
+          "type": "string",
+          "default": ".qualis"
+        },
+        "formats": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "json",
+              "sarif"
+            ]
+          },
+          "default": [
+            "json"
+          ]
+        },
+        "includeSources": {
+          "type": "boolean",
+          "default": false
+        },
+        "history": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 20,
+          "description": "Analyses kept in <dir>/history, the latest included; 0 disables the history."
+        }
+      }
+    }
+  }
+}

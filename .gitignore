@@ -1,0 +1,15 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.qualis/
+coverage/
+docs/site/
+.DS_Store
+.claude/
+plugins/roslyn/bin/
+**/dotnet/bin/
+**/dotnet/obj/
+.next/
+next-env.d.ts
+plugins/csharp/grammar/
+.qualis-ui/

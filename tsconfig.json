@@ -1,0 +1,29 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "packages/schema"
+    },
+    {
+      "path": "packages/plugin-api"
+    },
+    {
+      "path": "packages/core"
+    },
+    {
+      "path": "packages/cli"
+    },
+    {
+      "path": "plugins/typescript"
+    },
+    {
+      "path": "plugins/csharp"
+    },
+    {
+      "path": "plugins/eslint"
+    },
+    {
+      "path": "plugins/roslyn"
+    }
+  ]
+}

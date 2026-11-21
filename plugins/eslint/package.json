@@ -1,0 +1,33 @@
+{
+  "name": "@qualis/plugin-eslint",
+  "version": "0.1.0",
+  "description": "Qualis rule pack running the ESLint and typescript-eslint recommended rules on TypeScript and JavaScript files.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20.19"
+  },
+  "dependencies": {
+    "@eslint/js": "^10.0.1",
+    "@qualis/plugin-api": "workspace:*",
+    "eslint": "^10.14.0",
+    "globals": "^17.0.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.72.1"
+  },
+  "devDependencies": {
+    "@qualis/core": "workspace:*",
+    "@qualis/plugin-typescript": "workspace:*"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@qualis/docs",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Static documentation site of Qualis, generated from the plugin rule metadata and the published schemas.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "node build/build-docs.mjs"
+  },
+  "devDependencies": {
+    "@qualis/core": "workspace:*",
+    "@qualis/plugin-csharp": "workspace:*",
+    "@qualis/plugin-eslint": "workspace:*",
+    "@qualis/plugin-roslyn": "workspace:*",
+    "@qualis/plugin-typescript": "workspace:*",
+    "@qualis/schema": "workspace:*",
+    "@tailwindcss/cli": "4.3.4",
+    "marked": "^18.1.3",
+    "tailwindcss": "4.3.4"
+  }
+}

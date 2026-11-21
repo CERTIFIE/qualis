@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:qualis:schema:file-analysis:1",
+  "title": "Qualis file analysis",
+  "description": "Result of analysing one file, returned by a language plugin.",
+  "type": "object",
+  "required": [
+    "issues",
+    "measures"
+  ],
+  "properties": {
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "ruleId",
+          "message",
+          "range"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "ruleId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          },
+          "range": {
+            "$ref": "urn:qualis:schema:common:1#/$defs/TextRange"
+          },
+          "secondaryLocations": {
+            "type": "array",
+            "items": {
+              "$ref": "urn:qualis:schema:common:1#/$defs/SecondaryLocation"
+            }
+          },
+          "effortMinutes": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "measures": {
+      "type": "object",
+      "required": [
+        "lines",
+        "ncloc",
+        "commentLines",
+        "functions",
+        "classes",
+        "statements",
+        "complexity",
+        "cognitiveComplexity"
+      ],
+      "properties": {
+        "lines": {
+          "$ref": "urn:qualis:schema:common:1#/$defs/NonNegativeInt"
+        },
+        "ncloc": {
+          "$ref": "urn:qualis:schema:common:1#/$defs/NonNegativeInt"
+        },
+        "commentLines": {
+          "$ref": "urn:qualis:schema:common:1#/$defs/NonNegativeInt"
+        },
+        "functions": {
+          "$ref": "urn:qualis:schema:common:1#/$defs/NonNegativeInt"
+        },
+        "classes": {
+          "$ref": "urn:qualis:schema:common:1#/$defs/NonNegativeInt"
+        },
+        "statements": {
+          "$ref": "urn:qualis:schema:common:1#/$defs/NonNegativeInt"
+        },
+        "complexity": {
+          "$ref": "urn:qualis:schema:common:1#/$defs/NonNegativeInt"
+        },
+        "cognitiveComplexity": {
+          "$ref": "urn:qualis:schema:common:1#/$defs/NonNegativeInt"
+        }
+      }
+    },
+    "codeLines": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:qualis:schema:common:1#/$defs/PositiveInt"
+      }
+    },
+    "cpdTokens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "image",
+          "startLine",
+          "endLine"
+        ],
+        "properties": {
+          "image": {
+            "type": "string"
+          },
+          "startLine": {
+            "$ref": "urn:qualis:schema:common:1#/$defs/PositiveInt"
+          },
+          "endLine": {
+            "$ref": "urn:qualis:schema:common:1#/$defs/PositiveInt"
+          }
+        }
+      }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "level",
+          "message"
+        ],
+        "properties": {
+          "level": {
+            "enum": [
+              "error",
+              "warning",
+              "info"
+            ]
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "functions": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:qualis:schema:common:1#/$defs/FunctionMetrics"
+      }
+    },
+    "halstead": {
+      "$ref": "urn:qualis:schema:common:1#/$defs/HalsteadCounts"
+    },
+    "executableLines": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:qualis:schema:common:1#/$defs/PositiveInt"
+      },
+      "description": "Lines a coverage tool would count as executable; lines to cover of files missing from the coverage reports."
+    }
+  },
+  "$defs": {
+    "RulePackAnalysis": {
+      "description": "Result of a rule pack for one file.",
+      "type": "object",
+      "required": [
+        "issues"
+      ],
+      "properties": {
+        "issues": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "ruleId",
+              "message",
+              "range"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "ruleId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "message": {
+                "type": "string",
+                "minLength": 1
+              },
+              "range": {
+                "$ref": "urn:qualis:schema:common:1#/$defs/TextRange"
+              },
+              "secondaryLocations": {
+                "type": "array",
+                "items": {
+                  "$ref": "urn:qualis:schema:common:1#/$defs/SecondaryLocation"
+                }
+              },
+              "effortMinutes": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "level",
+              "message"
+            ],
+            "properties": {
+              "level": {
+                "enum": [
+                  "error",
+                  "warning",
+                  "info"
+                ]
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

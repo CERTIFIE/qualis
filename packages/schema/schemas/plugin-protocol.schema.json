@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:qualis:schema:plugin-protocol:1",
+  "title": "Qualis stdio plugin protocol (JSON-RPC 2.0 parameters)",
+  "description": "Parameters of the requests the host sends to an out-of-process plugin. Results are described by plugin-manifest.schema.json (initialize) and file-analysis.schema.json (analyzeFile).",
+  "$defs": {
+    "PluginFile": {
+      "type": "object",
+      "required": [
+        "path",
+        "absolutePath",
+        "language"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Path relative to the project root, forward slashes."
+        },
+        "absolutePath": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        }
+      }
+    },
+    "InitializeParams": {
+      "type": "object",
+      "required": [
+        "apiVersion",
+        "host"
+      ],
+      "properties": {
+        "apiVersion": {
+          "const": 1
+        },
+        "host": {
+          "type": "object",
+          "required": [
+            "name",
+            "version"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "PrepareParams": {
+      "type": "object",
+      "required": [
+        "baseDir",
+        "files",
+        "options"
+      ],
+      "properties": {
+        "baseDir": {
+          "type": "string"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PluginFile"
+          }
+        },
+        "options": {
+          "type": "object"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "params"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "params": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": [
+                    "number",
+                    "string",
+                    "boolean"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "AnalyzeFileParams": {
+      "type": "object",
+      "required": [
+        "file",
+        "content",
+        "rules"
+      ],
+      "properties": {
+        "file": {
+          "$ref": "#/$defs/PluginFile"
+        },
+        "content": {
+          "type": "string"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "params"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "params": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": [
+                    "number",
+                    "string",
+                    "boolean"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "LogParams": {
+      "type": "object",
+      "required": [
+        "level",
+        "message"
+      ],
+      "properties": {
+        "level": {
+          "enum": [
+            "debug",
+            "info",
+            "warning",
+            "error"
+          ]
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

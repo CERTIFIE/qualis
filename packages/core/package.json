@@ -1,0 +1,26 @@
+{
+  "name": "@qualis/core",
+  "version": "0.1.0",
+  "description": "Qualis analysis engine: plugin host, duplication detection, coverage and test import, metrics, ratings and quality gate.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" }
+  },
+  "files": ["dist"],
+  "engines": { "node": ">=20.11" },
+  "dependencies": {
+    "@qualis/plugin-api": "workspace:*",
+    "@qualis/schema": "workspace:*",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "fast-glob": "^3.3.3",
+    "fast-xml-parser": "^5.12.0",
+    "picomatch": "^4.0.3"
+  },
+  "devDependencies": {
+    "@types/picomatch": "^4.0.2"
+  }
+}

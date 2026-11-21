@@ -1,0 +1,189 @@
+@import "tailwindcss";
+@source "../site";
+@source "./app.js";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --color-bg: var(--q-bg);
+  --color-fg: var(--q-fg);
+  --color-muted: var(--q-muted);
+  --color-faint: var(--q-faint);
+  --color-line: var(--q-line);
+  --color-line-strong: var(--q-line-strong);
+  --color-soft: var(--q-soft);
+  --color-accent: var(--q-accent);
+  --color-accent-soft: var(--q-accent-soft);
+  --color-danger: var(--q-danger);
+  --color-warning: var(--q-warning);
+  --color-success: var(--q-success);
+}
+
+:root {
+  --q-bg: #ffffff;
+  --q-fg: #0b0b0b;
+  --q-muted: #5f5e5a;
+  --q-faint: #888780;
+  --q-line: #e6e5e0;
+  --q-line-strong: #d3d1c7;
+  --q-soft: #f6f5f1;
+  --q-accent: #185fa5;
+  --q-accent-soft: #e6f1fb;
+  --q-danger: #a32d2d;
+  --q-warning: #854f0b;
+  --q-success: #3b6d11;
+  color-scheme: light;
+}
+
+.dark {
+  --q-bg: #0a0a0a;
+  --q-fg: #ededeb;
+  --q-muted: #a3a29b;
+  --q-faint: #6f6e69;
+  --q-line: #222220;
+  --q-line-strong: #34342f;
+  --q-soft: #141413;
+  --q-accent: #85b7eb;
+  --q-accent-soft: #0c2a4a;
+  --q-danger: #f09595;
+  --q-warning: #ef9f27;
+  --q-success: #97c459;
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    @apply bg-bg text-fg antialiased;
+    scroll-padding-top: 5rem;
+  }
+  ::selection {
+    @apply bg-accent-soft;
+  }
+}
+
+@layer components {
+  .label {
+    @apply font-mono text-[11px] uppercase tracking-[0.08em];
+  }
+  .badge {
+    @apply inline-flex items-center gap-1 border border-line-strong px-1.5 py-0.5 font-mono text-[10.5px] uppercase tracking-[0.06em] text-muted;
+  }
+  .icon {
+    @apply inline-block size-4 shrink-0;
+  }
+
+  /* Rendered Markdown */
+  .prose {
+    @apply text-[15px] leading-7 text-fg;
+  }
+  .prose > * + * {
+    @apply mt-4;
+  }
+  .prose td a:not(.not-prose *) {
+    @apply break-words;
+  }
+  .prose h2 {
+    @apply mt-10 scroll-mt-20 border-t border-line pt-8 text-xl font-medium tracking-tight;
+  }
+  .prose h3 {
+    @apply mt-8 scroll-mt-20 text-base font-medium;
+  }
+  .prose h2 .anchor,
+  .prose h3 .anchor {
+    @apply ml-2 text-faint no-underline opacity-0 transition-opacity;
+  }
+  .prose h2:hover .anchor,
+  .prose h3:hover .anchor {
+    @apply opacity-100;
+  }
+  .prose p:not(.not-prose *),
+  .prose li:not(.not-prose *) {
+    @apply text-muted;
+  }
+  .prose strong {
+    @apply font-medium text-fg;
+  }
+  .prose a:not(.not-prose *) {
+    @apply text-fg underline decoration-line-strong underline-offset-4 hover:decoration-fg;
+  }
+  .prose ul:not(.not-prose *) {
+    @apply list-disc space-y-1.5 pl-5 marker:text-faint;
+  }
+  .prose ol:not(.not-prose *) {
+    @apply list-decimal space-y-1.5 pl-5 marker:text-faint;
+  }
+  .prose :not(pre) > code {
+    @apply border border-line bg-soft px-1 py-px font-mono text-[0.85em] text-fg;
+  }
+  .prose .table-wrap {
+    @apply overflow-x-auto border border-line;
+  }
+  .prose table {
+    @apply w-full border-collapse text-left text-[13.5px];
+  }
+  .prose th {
+    @apply border-b border-line bg-soft px-3 py-2 font-mono text-[11px] font-normal uppercase tracking-[0.06em] text-muted;
+  }
+  .prose td {
+    @apply border-b border-line px-3 py-2 align-top text-muted;
+  }
+  .prose tr:last-child td {
+    @apply border-b-0;
+  }
+  .prose hr {
+    @apply my-10 border-line;
+  }
+
+  .code {
+    @apply overflow-hidden border border-line bg-soft;
+  }
+  .code-head {
+    @apply flex items-center border-b border-line;
+  }
+  .code-title {
+    @apply px-3 py-1.5 font-mono text-[11px] text-faint;
+  }
+  .code pre {
+    @apply overflow-x-auto px-4 py-3 font-mono text-[13px] leading-6 text-fg;
+  }
+  .copy-btn {
+    @apply ml-auto flex items-center gap-1 px-3 py-1.5 font-mono text-[11px] uppercase text-faint hover:text-fg;
+  }
+  .tab-btn {
+    @apply -mb-px border-b border-transparent px-3 py-1.5 font-mono text-[11px] text-faint hover:text-fg;
+  }
+  .tab-btn[aria-selected="true"] {
+    @apply border-fg text-fg;
+  }
+
+  .callout {
+    @apply flex gap-3 border border-l-2 border-line px-4 py-3 text-[14px];
+  }
+  .callout p {
+    @apply text-muted;
+  }
+  .callout-note {
+    @apply border-l-accent bg-accent-soft/40;
+  }
+  .callout-tip {
+    @apply border-l-success;
+  }
+  .callout-warning {
+    @apply border-l-warning;
+  }
+
+  .nav-link {
+    @apply flex items-center border-l border-transparent py-1 pr-2 pl-7 text-[13.5px] text-muted hover:text-fg;
+  }
+  .nav-link[aria-current="page"] {
+    @apply border-fg bg-soft text-fg;
+  }
+  .toc-link {
+    @apply block py-1 text-[12.5px] text-faint hover:text-fg;
+  }
+  .toc-link.active {
+    @apply text-fg;
+  }
+}

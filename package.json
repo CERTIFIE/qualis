@@ -1,0 +1,32 @@
+{
+  "name": "qualis-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Qualis: open static code analysis with pluggable language analyzers, an open report format and quality gates.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "scripts": {
+    "build": "tsc -b && node plugins/csharp/scripts/copy-grammar.mjs && node plugins/roslyn/scripts/build-dotnet.mjs",
+    "clean": "tsc -b --clean",
+    "test": "pnpm run build && vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -b --pretty",
+    "docs:build": "pnpm build && pnpm --filter @qualis/docs build",
+    "qualis": "node packages/cli/dist/bin.js",
+    "docs:serve": "node docs/build/serve.mjs",
+    "ui:dev": "node scripts/ui.mjs --dev",
+    "ui:build": "tsc -b packages/schema && pnpm --filter @qualis/ui build",
+    "ui": "node scripts/ui.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "typescript": "~5.9.3",
+    "vitest": "^5.1.0"
+  }
+}

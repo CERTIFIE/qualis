@@ -1,0 +1,33 @@
+{
+  "name": "qualis",
+  "version": "0.1.0",
+  "description": "Qualis command line: static analysis of security, reliability, maintainability, tests, coverage and duplications with a quality gate.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "qualis": "./dist/bin.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20.11"
+  },
+  "dependencies": {
+    "@qualis/core": "workspace:*",
+    "@qualis/plugin-api": "workspace:*",
+    "@qualis/plugin-csharp": "workspace:*",
+    "@qualis/plugin-eslint": "workspace:*",
+    "@qualis/plugin-roslyn": "workspace:*",
+    "@qualis/plugin-typescript": "workspace:*",
+    "@qualis/schema": "workspace:*"
+  }
+}

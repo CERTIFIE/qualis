@@ -1,0 +1,456 @@
+{
+ "schemaVersion": "1.0.0",
+ "tool": {
+  "name": "qualis",
+  "version": "0.1.0",
+  "plugins": [
+   {
+    "id": "typescript",
+    "name": "TypeScript / JavaScript",
+    "version": "0.1.0",
+    "apiVersion": 1,
+    "transport": "module",
+    "kind": "language",
+    "languages": [
+     "typescript",
+     "javascript"
+    ]
+   },
+   {
+    "id": "csharp",
+    "name": "C#",
+    "version": "0.1.0",
+    "apiVersion": 1,
+    "transport": "module",
+    "kind": "language",
+    "languages": [
+     "csharp"
+    ]
+   },
+   {
+    "id": "eslint",
+    "name": "ESLint",
+    "version": "0.1.0",
+    "apiVersion": 1,
+    "transport": "module",
+    "kind": "rule-pack",
+    "languages": [
+     "typescript",
+     "javascript"
+    ]
+   },
+   {
+    "id": "roslyn",
+    "name": "Roslyn (.NET code analysis)",
+    "version": "0.1.0",
+    "apiVersion": 1,
+    "transport": "process",
+    "kind": "rule-pack",
+    "languages": [
+     "csharp"
+    ]
+   }
+  ]
+ },
+ "project": {
+  "key": "tiny",
+  "name": "Tiny"
+ },
+ "analysis": {
+  "id": "8b815e0a-3747-4fd9-9ad5-ddf04a748727",
+  "startedAt": "2026-11-04T22:20:55.070Z",
+  "finishedAt": "2026-11-04T22:20:55.885Z",
+  "durationMs": 815,
+  "vcs": {
+   "type": "git",
+   "revision": null,
+   "branch": null,
+   "dirty": false
+  },
+  "newCode": null
+ },
+ "qualityGate": {
+  "name": "Qualis default",
+  "status": "passed",
+  "conditions": [
+   {
+    "metric": "reliabilityRating",
+    "scope": "new",
+    "operator": "gt",
+    "threshold": "A",
+    "actual": null,
+    "status": "no-data"
+   },
+   {
+    "metric": "securityRating",
+    "scope": "new",
+    "operator": "gt",
+    "threshold": "A",
+    "actual": null,
+    "status": "no-data"
+   },
+   {
+    "metric": "maintainabilityRating",
+    "scope": "new",
+    "operator": "gt",
+    "threshold": "A",
+    "actual": null,
+    "status": "no-data"
+   },
+   {
+    "metric": "coverage",
+    "scope": "new",
+    "operator": "lt",
+    "threshold": 80,
+    "actual": null,
+    "status": "no-data"
+   },
+   {
+    "metric": "duplicatedLinesDensity",
+    "scope": "new",
+    "operator": "gt",
+    "threshold": 3,
+    "actual": null,
+    "status": "no-data"
+   },
+   {
+    "metric": "blockerIssues",
+    "scope": "overall",
+    "operator": "gt",
+    "threshold": 0,
+    "actual": 0,
+    "status": "passed"
+   },
+   {
+    "metric": "testFailures",
+    "scope": "overall",
+    "operator": "gt",
+    "threshold": 0,
+    "actual": null,
+    "status": "no-data"
+   }
+  ]
+ },
+ "measures": {
+  "overall": {
+   "files": 1,
+   "lines": 9,
+   "ncloc": 8,
+   "commentLines": 0,
+   "commentLinesDensity": 0,
+   "functions": 2,
+   "classes": 0,
+   "statements": 6,
+   "complexity": 4,
+   "cognitiveComplexity": 2,
+   "complexityDensity": 500,
+   "functionStats": {
+    "count": 2,
+    "averageComplexity": 2,
+    "maxComplexity": 3,
+    "averageCognitiveComplexity": 1,
+    "maxCognitiveComplexity": 2,
+    "averageNcloc": 4,
+    "averageParameters": 1.5,
+    "maxNestingDepth": 1,
+    "complexityDistribution": {
+     "low": 2,
+     "moderate": 0,
+     "high": 0,
+     "veryHigh": 0
+    },
+    "averageMaintainabilityIndex": 73.5,
+    "minMaintainabilityIndex": 70,
+    "maintainabilityDistribution": {
+     "high": 2,
+     "moderate": 0,
+     "low": 0
+    }
+   },
+   "halstead": {
+    "volume": 229.25,
+    "effort": 2407.11,
+    "deliveredBugs": 0.0599
+   },
+   "hotspots": {
+    "complexity": [
+     {
+      "path": "src/a.ts",
+      "name": "classify",
+      "startLine": 5,
+      "value": 3
+     },
+     {
+      "path": "src/a.ts",
+      "name": "add",
+      "startLine": 1,
+      "value": 1
+     }
+    ],
+    "cognitiveComplexity": [
+     {
+      "path": "src/a.ts",
+      "name": "classify",
+      "startLine": 5,
+      "value": 2
+     },
+     {
+      "path": "src/a.ts",
+      "name": "add",
+      "startLine": 1,
+      "value": 0
+     }
+    ],
+    "maintainabilityIndex": [
+     {
+      "path": "src/a.ts",
+      "name": "classify",
+      "startLine": 5,
+      "value": 70
+     },
+     {
+      "path": "src/a.ts",
+      "name": "add",
+      "startLine": 1,
+      "value": 77
+     }
+    ]
+   },
+   "issues": {
+    "total": 1,
+    "blocker": 0,
+    "critical": 1,
+    "major": 0,
+    "minor": 0,
+    "info": 0,
+    "bugs": 0,
+    "vulnerabilities": 1,
+    "securityHotspots": 0,
+    "codeSmells": 0
+   },
+   "ratings": {
+    "reliability": "A",
+    "security": "D",
+    "maintainability": "A"
+   },
+   "technicalDebtMinutes": 0,
+   "debtRatio": 0,
+   "duplication": {
+    "duplicatedLines": 0,
+    "duplicatedBlocks": 0,
+    "duplicatedFiles": 0,
+    "duplicatedLinesDensity": 0
+   },
+   "coverage": null,
+   "tests": null
+  },
+  "newCode": null
+ },
+ "files": [
+  {
+   "path": "src/a.ts",
+   "language": "typescript",
+   "plugin": "typescript",
+   "measures": {
+    "lines": 9,
+    "ncloc": 8,
+    "commentLines": 0,
+    "functions": 2,
+    "classes": 0,
+    "statements": 6,
+    "complexity": 4,
+    "cognitiveComplexity": 2,
+    "issues": 1,
+    "duplicatedLines": 0,
+    "technicalDebtMinutes": 0,
+    "halstead": {
+     "distinctOperators": 14,
+     "distinctOperands": 10,
+     "totalOperators": 35,
+     "totalOperands": 15,
+     "vocabulary": 24,
+     "length": 50,
+     "volume": 229.25,
+     "difficulty": 10.5,
+     "effort": 2407.11,
+     "timeSeconds": 133.73,
+     "deliveredBugs": 0.0599
+    },
+    "maintainabilityIndex": 70
+   },
+   "functions": [
+    {
+     "name": "add",
+     "kind": "function",
+     "range": {
+      "startLine": 1,
+      "startColumn": 1,
+      "endLine": 3,
+      "endColumn": 2
+     },
+     "ncloc": 3,
+     "parameters": 2,
+     "complexity": 1,
+     "cognitiveComplexity": 0,
+     "maxNestingDepth": 0,
+     "halstead": {
+      "distinctOperators": 10,
+      "distinctOperands": 3,
+      "totalOperators": 14,
+      "totalOperands": 5,
+      "vocabulary": 13,
+      "length": 19,
+      "volume": 70.31,
+      "difficulty": 8.33,
+      "effort": 585.9,
+      "timeSeconds": 32.55,
+      "deliveredBugs": 0.0233
+     },
+     "maintainabilityIndex": 77
+    },
+    {
+     "name": "classify",
+     "kind": "function",
+     "range": {
+      "startLine": 5,
+      "startColumn": 1,
+      "endLine": 9,
+      "endColumn": 2
+     },
+     "ncloc": 5,
+     "parameters": 1,
+     "complexity": 3,
+     "cognitiveComplexity": 2,
+     "maxNestingDepth": 1,
+     "halstead": {
+      "distinctOperators": 12,
+      "distinctOperands": 7,
+      "totalOperators": 21,
+      "totalOperands": 10,
+      "vocabulary": 19,
+      "length": 31,
+      "volume": 131.69,
+      "difficulty": 8.57,
+      "effort": 1128.74,
+      "timeSeconds": 62.71,
+      "deliveredBugs": 0.0361
+     },
+     "maintainabilityIndex": 70
+    }
+   ],
+   "source": "export function add(a: number, b: number): number {\n  return a + b;\n}\n\nexport function classify(n: number): string {\n  if (n < 0) return \"negative\";\n  if (n === 0) return \"zero\";\n  return eval(\"'positive'\");\n}\n"
+  }
+ ],
+ "issues": [
+  {
+   "id": "92536cbd0068a82a1349",
+   "ruleId": "eslint:no-eval",
+   "type": "vulnerability",
+   "characteristic": "security",
+   "severity": "critical",
+   "message": "`eval` can be harmful.",
+   "path": "src/a.ts",
+   "range": {
+    "startLine": 8,
+    "startColumn": 10,
+    "endLine": 8,
+    "endColumn": 14
+   },
+   "effortMinutes": 30,
+   "tags": [
+    "eslint",
+    "cwe-95"
+   ],
+   "isNew": false
+  }
+ ],
+ "rules": [
+  {
+   "id": "eslint:no-eval",
+   "name": "Disallow the use of eval()",
+   "languages": [
+    "typescript",
+    "javascript"
+   ],
+   "type": "vulnerability",
+   "severity": "critical",
+   "tags": [
+    "eslint",
+    "cwe-95"
+   ],
+   "enabledByDefault": true,
+   "effortMinutes": 30,
+   "description": "Disallow the use of `eval()`. Runs the `no-eval` rule of ESLint unchanged.",
+   "rationale": "This rule is defined and maintained by the ESLint project, which documents the problem it detects, its options and examples on the linked page. MITRE classifies the underlying weakness as CWE-95. When this rule is enabled it replaces `typescript:no-eval`, which detects the same problem.",
+   "references": [
+    {
+     "publisher": "ESLint",
+     "title": "no-eval: Disallow the use of `eval()`",
+     "url": "https://eslint.org/docs/latest/rules/no-eval"
+    },
+    {
+     "publisher": "MITRE CWE",
+     "id": "CWE-95",
+     "title": "Improper Neutralization of Directives in Dynamically Evaluated Code ('Eval Injection')",
+     "url": "https://cwe.mitre.org/data/definitions/95.html"
+    }
+   ],
+   "supersedes": [
+    "typescript:no-eval"
+   ],
+   "plugin": "eslint",
+   "defaultSeverity": "critical",
+   "paramValues": {}
+  }
+ ],
+ "duplications": [],
+ "tests": null,
+ "coverageReports": [],
+ "diagnostics": [
+  {
+   "level": "info",
+   "source": "core",
+   "message": "Rule typescript:no-cond-assign is superseded by eslint:no-cond-assign"
+  },
+  {
+   "level": "info",
+   "source": "core",
+   "message": "Rule typescript:no-debugger is superseded by eslint:no-debugger"
+  },
+  {
+   "level": "info",
+   "source": "core",
+   "message": "Rule typescript:no-duplicate-case is superseded by eslint:no-duplicate-case"
+  },
+  {
+   "level": "info",
+   "source": "core",
+   "message": "Rule typescript:no-empty-catch is superseded by eslint:no-empty"
+  },
+  {
+   "level": "info",
+   "source": "core",
+   "message": "Rule typescript:no-eval is superseded by eslint:no-eval"
+  },
+  {
+   "level": "info",
+   "source": "core",
+   "message": "Rule typescript:no-fallthrough is superseded by eslint:no-fallthrough"
+  },
+  {
+   "level": "info",
+   "source": "core",
+   "message": "Rule typescript:no-unsafe-finally is superseded by eslint:no-unsafe-finally"
+  },
+  {
+   "level": "info",
+   "source": "core",
+   "message": "Rule typescript:no-compare-nan is superseded by eslint:use-isnan"
+  },
+  {
+   "level": "info",
+   "source": "core",
+   "message": "Rule typescript:valid-typeof is superseded by eslint:valid-typeof"
+  }
+ ]
+}
