@@ -68,6 +68,9 @@ for (const pkg of packages) {
   manifest.homepage = `https://${owner.toLowerCase()}.github.io/${repoName}/`;
   manifest.bugs = { url: `${repoUrl}/issues` };
   manifest.publishConfig = { registry: "https://npm.pkg.github.com" };
+  // Apache-2.0 section 4: every redistributed package carries the license and the attribution notices.
+  for (const file of ["LICENSE", "NOTICE"]) cpSync(path.join(root, file), path.join(work, "package", file));
+  if (Array.isArray(manifest.files)) manifest.files = [...new Set([...manifest.files, "LICENSE", "NOTICE"])];
   writeFileSync(manifestFile, `${JSON.stringify(manifest, null, 2)}\n`);
   const packed = run("npm", ["pack", "--json", "--pack-destination", NPM, "./package"], work);
   const filename = JSON.parse(packed)[0].filename;
