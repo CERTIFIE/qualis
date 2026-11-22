@@ -1,8 +1,42 @@
 ---
-title: Introduction
+title: What is Qualis
 description: Qualis is an open static code analyzer with sourced rules, human-oriented metrics, an open report format and pluggable languages.
 ---
-Qualis analyzes source code and answers one question for a team: **is this change good enough to ship?** It measures security, reliability and maintainability, imports test results and coverage, detects duplicated code, computes metrics that help a person understand the code, and evaluates a quality gate that passes or fails the build.
+Qualis analyzes the source code of a repository and answers one question for a team: **is this change good enough to ship?** It checks security, reliability and maintainability, reads test results and coverage, finds duplicated code, and evaluates a quality gate that passes or fails the build. Every rule comes from an official source.
+
+## The three parts
+
+| Part | What it does | Do you need it? |
+|---|---|---|
+| **Qualis CLI** | The `qualis` command. It analyzes a repository, prints the results and saves them as JSON in `.qualis/`. | Yes |
+| **Plugins** | Teach the CLI a language. TypeScript, JavaScript and C# are included. | Included; add more when you need them |
+| **Qualis UI** | A web application that shows the results of your repositories: quality gate, issues, code, coverage, history. | Optional |
+
+## From zero to results
+
+1. **[Install the CLI](installation.html)**: download a release and install it with npm.
+2. **[Analyze a repository](usage.html)**: run `qualis analyze` in the repository root and read the results in the terminal.
+3. **[Add plugins](add-plugins.html)**, if the bundled ones don't cover your languages.
+4. **Use the results**: `.qualis/report.json` follows a [published JSON format](report-format.html), so you can build your own pages or tools on it, or…
+5. **[Install Qualis UI](ui-install.html)** and **[connect the repository](web-ui.html)** to browse the results.
+
+Want to extend Qualis? See [Write a plugin](plugins.html) and [Contribute](contributing.html).
+
+```text title="Terminal"
+$ qualis analyze
+Quality gate "Qualis default": FAILED
+  ✗ securityRating (new code) = D  fails when > A
+  ✓ blockerIssues (overall) = 0  fails when > 0
+
+Overall code
+  Security        D  1 vulnerabilities
+  Reliability     A  0 bugs
+  Maintainability A  12 code smells, debt 2.1h (0.4%)
+  Coverage        81.4%  lines 84.0%, branches 72.5%
+  Duplications     1.2%  3 blocks, 41 lines
+
+Report: .qualis/report.json
+```
 
 ## Features
 
@@ -14,38 +48,6 @@ Qualis analyzes source code and answers one question for a team: **is this chang
 <div class="bg-bg p-4"><div class="text-[14px] font-medium">Open report</div><p class="mt-1 text-[13.5px] leading-6 text-muted">report.json follows a published JSON Schema: any tool can read it. SARIF output feeds code scanning.</p></div>
 <div class="bg-bg p-4"><div class="text-[14px] font-medium">Any language</div><p class="mt-1 text-[13.5px] leading-6 text-muted">Languages are plugins: a JavaScript module, or any executable speaking JSON-RPC over stdio.</p></div>
 </div>
-
-## Your first analysis
-
-```bash tab=npm
-npx qualis analyze .
-```
-
-```bash tab=pnpm
-pnpm dlx qualis analyze .
-```
-
-```bash tab=bun
-bunx qualis analyze .
-```
-
-> [!NOTE]
-> Qualis 0.1.0 is not yet published to npm. Until then, run Qualis from source as described in [Installation](installation.html).
-
-The command prints a summary, writes `.qualis/report.json` and exits with `0` when the quality gate passes, `1` when it fails and `2` on errors.
-
-```text title="Terminal"
-Quality gate "Qualis default": FAILED
-  ✗ securityRating (new code) = D  fails when > A
-  ✓ blockerIssues (overall) = 0  fails when > 0
-
-Overall code
-  Security        D  1 vulnerabilities
-  Reliability     A  0 bugs
-  Maintainability A  12 code smells, debt 2.1h (0.4%)
-  Coverage        81.4%  lines 84.0%, branches 72.5%
-  Duplications     1.2%  3 blocks, 41 lines
-```
 
 ## How it works
 

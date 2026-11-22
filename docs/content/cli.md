@@ -2,7 +2,7 @@
 title: Command line
 description: Commands and options of the qualis CLI.
 ---
-Run `qualis --help` for a summary of the commands and `qualis --version` for the installed version. [Usage](usage.html) shows the commands at work on a project.
+Run `qualis --help` for a summary of the commands and `qualis --version` for the installed version. [Analyze a repository](usage.html) shows the commands at work on a project.
 
 ## qualis analyze
 
@@ -12,7 +12,7 @@ qualis analyze [dir] [options]
 
 Analyzes the project in `dir` (default: the current directory), writes the reports and evaluates the quality gate.
 
-The results always go to the project's `.qualis/` folder (or `--output`): `report.json` is the latest analysis and `history/` keeps a timestamped copy of each recent analysis, the latest included. This folder is what the [web UI](web-ui.html) imports. Add `.qualis/` to the project's `.gitignore`.
+The results always go to the project's `.qualis/` folder (or `--output`): `report.json` is the latest analysis and `history/` keeps a timestamped copy of each recent analysis, the latest included. This folder is what the [Qualis UI](web-ui.html) imports. Add `.qualis/` to the project's `.gitignore`.
 
 | Option | Meaning |
 |---|---|

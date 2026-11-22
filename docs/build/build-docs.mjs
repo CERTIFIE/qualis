@@ -111,12 +111,26 @@ const METHOD_SOURCES = [
 // ---------------------------------------------------------------------------
 
 const NAV = [
-  { title: "Get started", icon: "rocket", items: [["index", "Introduction"], ["installation", "Installation"], ["usage", "Usage"], ["configuration", "Configuration"], ["ci", "CI integration"], ["cli", "Command line"], ["web-ui", "Web UI"]] },
+  {
+    title: "Get started",
+    icon: "rocket",
+    items: [
+      ["index", "What is Qualis"],
+      ["installation", "Install the CLI"],
+      ["usage", "Analyze a repository"],
+      ["add-plugins", "Add plugins"],
+      ["ui-install", "Install Qualis UI"],
+      ["web-ui", "Use Qualis UI"],
+      ["plugins", "Write a plugin"],
+      ["contributing", "Contribute"],
+    ],
+  },
+  { title: "Guides", icon: "terminal-2", items: [["configuration", "Configuration"], ["ci", "CI integration"], ["cli", "Command line"]] },
   { title: "Concepts", icon: "chart-dots", items: [["metrics", "Metrics"], ["ratings", "Ratings and technical debt"], ["quality-gate", "Quality gate"], ["new-code", "New code"], ["coverage-and-tests", "Coverage and tests"], ["external-issues", "External issues"], ["duplications", "Duplications"]] },
   { title: "Rules", icon: "list-check", items: [["rules/index", "All rules"], ...plugins.map((p) => [`rules/${p.id}`, p.name])] },
-  { title: "Reference", icon: "book-2", items: [["report-format", "Report format"], ["plugins", "Writing a plugin"], ["sources", "Sources"]] },
+  { title: "Reference", icon: "book-2", items: [["report-format", "Report format"], ["sources", "Sources"]] },
 ];
-const TOP_NAV = [["index", "Docs", ["Get started", "Concepts"]], ["rules/index", "Rules", ["Rules"]], ["report-format", "Report", []], ["plugins", "Plugins", []]];
+const TOP_NAV = [["index", "Docs", ["Get started", "Guides", "Concepts"]], ["rules/index", "Rules", ["Rules"]], ["report-format", "Report", []], ["plugins", "Plugins", []]];
 const ORDER = NAV.flatMap((g) => g.items.map(([slug, title]) => ({ slug, title, group: g.title })));
 const groupOf = (slug) => (slug.startsWith("rules/") ? "Rules" : (ORDER.find((o) => o.slug === slug)?.group ?? "Docs"));
 

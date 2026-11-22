@@ -1,12 +1,42 @@
 ---
-title: Usage
-description: Analyze a project with the qualis command, read the results, add coverage and tests, and run it from a package script or the CI.
+title: Analyze a repository
+description: Set up a repository, run qualis analyze, read the results in the terminal and in the .qualis folder.
 ---
-This page walks through a typical first use of the `qualis` command. Every option is listed in [Command line](cli.html).
+This page takes a repository from its first analysis to results you can use. Every option is listed in [Command line](cli.html).
 
-## Analyze a project
+## Set up the repository
 
-Run `qualis analyze` in the project folder, or pass the folder:
+Qualis works without configuration: it finds the languages by file extension and skips the files ignored by git. Two small steps are still worth doing once, in the repository root.
+
+Ignore the results folder, which every analysis rewrites:
+
+```text title=".gitignore"
+.qualis/
+```
+
+Create a configuration file, to change the quality gate, the files analyzed, the rules or the [plugins](add-plugins.html) later:
+
+```bash
+qualis init
+```
+
+It writes `qualis.config.json` with the default quality gate, the usual locations of coverage and test reports and SARIF output, and never overwrites an existing file. Every setting is described in [Configuration](configuration.html).
+
+If Qualis is a [development dependency](installation.html#or-add-it-to-a-project) of the project, also add a script:
+
+```json title="package.json"
+{
+  "scripts": {
+    "analyze": "qualis analyze"
+  }
+}
+```
+
+Options are appended to the script: `pnpm analyze --issues`, or with npm `npm run analyze -- --issues`.
+
+## Run the analysis
+
+Run `qualis analyze` in the repository root, or pass the folder:
 
 ```bash
 cd ~/projects/my-app
@@ -63,27 +93,21 @@ src/app.ts:12:32  major    Await this promise or handle its rejection with .catc
 
 Each rule is documented, with the official source it derives from, in [Rules](rules/index.html). To list the rules active for your project, run `qualis rules`. To silence an issue in place, or turn a rule off, see [Configuration](configuration.html).
 
-## Where the results go
+## The results in .qualis
 
-Every analysis writes into the project's `.qualis/` folder:
+Every analysis writes into the `.qualis/` folder of the repository:
 
 | File | Content |
 |---|---|
-| `.qualis/report.json` | The latest analysis, in the [report format](report-format.html). |
+| `.qualis/report.json` | The latest analysis: quality gate, measures, files, issues, rules, duplications, tests. |
 | `.qualis/history/<timestamp>.json` | One copy of each recent analysis, the latest included; the newest 20 are kept (`--history`). |
-| `.qualis/report.sarif` | SARIF 2.1.0, when `sarif` is among the formats (`--format json,sarif`). |
+| `.qualis/report.sarif` | SARIF 2.1.0, when `sarif` is among the formats (`--format json,sarif`, or the configuration written by `qualis init`). |
 
-Add `.qualis/` to the project's `.gitignore`. To browse the results, import the project folder in the [web UI](web-ui.html): it reads `.qualis/` on every visit, so each new analysis appears by itself.
+What to do with them:
 
-## Create a configuration
-
-The defaults work for most projects. To change the quality gate, the files analyzed or the rules, create a configuration file:
-
-```bash
-qualis init
-```
-
-It writes `qualis.config.json` with the default quality gate and the usual locations of coverage and test reports, and never overwrites an existing file. Every setting is described in [Configuration](configuration.html).
+- **Build your own pages or tools.** `report.json` follows a [published JSON Schema](report-format.html), with TypeScript types in `@qualis/schema`; `qualis validate` checks a file against it.
+- **Browse them in Qualis UI.** [Install Qualis UI](ui-install.html) and [connect the repository](web-ui.html): it reads `.qualis/` on every visit, so each new analysis appears by itself.
+- **Show them in code scanning.** Upload `report.sarif` to GitHub or Azure DevOps (see [CI integration](ci.html)).
 
 ## Add coverage and test results
 
@@ -108,24 +132,6 @@ On a feature branch, Qualis compares the code with the branch it started from an
 ```bash
 qualis analyze --new-code origin/main
 ```
-
-## Run it from a package script
-
-In a project that has Qualis as a development dependency, add a script and run it like any other:
-
-```json title="package.json"
-{
-  "scripts": {
-    "analyze": "qualis analyze"
-  }
-}
-```
-
-```bash
-pnpm analyze
-```
-
-Options are appended to the script: `pnpm analyze --issues`, or with npm `npm run analyze -- --issues`.
 
 ## Run it in the CI
 
