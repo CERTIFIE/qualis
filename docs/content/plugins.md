@@ -1,8 +1,29 @@
 ---
-title: Writing a plugin
-description: Add a language to Qualis with an in-process JavaScript module or with a process written in any language.
+title: Write a plugin
+description: What you need and the steps to write a Qualis plugin, as a JavaScript module or as a program in any language, and the full protocol.
 ---
 A plugin declares the languages and rules it supports and, for each file, returns issues (and, for a language plugin, measures). Everything else (duplication detection, coverage, tests, new code, ratings, quality gate, report) is done by the core, so a plugin stays small.
+
+## What you need
+
+| To write it in… | You need |
+|---|---|
+| JavaScript or TypeScript | Node.js 20.19 and the `@qualis/plugin-api` package, which provides `definePlugin`, `defineRule` and helpers. |
+| Any other language | Only a program that reads and writes JSON-RPC 2.0 messages on stdin/stdout, one per line. |
+
+In both cases every rule needs at least one reference to an official source, and a compliant and a noncompliant example (see [Rules need sources](#rules-need-sources)).
+
+## Steps
+
+**Step 1. Choose the kind.** A *language plugin* owns files by extension and measures them; a *rule pack* adds rules to the files of an existing language plugin. See [below](#language-plugins-and-rule-packs).
+
+**Step 2. Start from an example.** For JavaScript, copy the [minimal plugin](#in-process-plugins-javascript); outside this repository install the API under its source name, so the imports work unchanged: `npm install @qualis/plugin-api@npm:{{npm-scope}}/qualis-plugin-api` (GitHub Packages, see [Install the CLI](installation.html#or-add-it-to-a-project)). For another language, copy [`examples/python-plugin`]({{tree-url}}/examples/python-plugin), a complete plugin written with the Python standard library.
+
+**Step 3. Define the rules and analyze each file.** Return the issues of the enabled rules and, for a language plugin, the measures of the file (see [The contract](#the-contract)).
+
+**Step 4. Try it on a repository.** Add it to `plugins` in that repository's `qualis.config.json` (see [Add plugins](add-plugins.html)), then run `qualis rules` and `qualis analyze`.
+
+**Step 5. Publish it.** In your own repository, for example as `qualis-plugin-<language>` on npm, or as a pull request to this repository under `plugins/<name>` (see [Contribute](contributing.html)).
 
 ## Language plugins and rule packs
 

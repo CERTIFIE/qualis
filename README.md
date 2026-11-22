@@ -44,7 +44,7 @@ npm install --global ./qualis-0.1.0
 qualis --version
 ```
 
-The archive contains the command and all its dependencies, so no registry or token is needed. To pin the version in a project instead (as a development dependency, from GitHub Packages), see [Installation](https://certifie.github.io/qualis/installation.html).
+The archive contains the command and all its dependencies, so no registry or token is needed. To pin the version in a project instead (as a development dependency, from GitHub Packages), see [Install the CLI](https://certifie.github.io/qualis/installation.html#or-add-it-to-a-project).
 
 ## 2. Use the CLI
 
@@ -67,7 +67,7 @@ Add `.qualis/` to your `.gitignore`. The command exits with `0` when the quality
 
 Useful options: `--issues` lists every issue, `--coverage coverage/lcov.info` and `--tests "reports/*.xml"` import coverage and test results, `--new-code origin/main` compares with a branch.
 
-More: [Usage](https://certifie.github.io/qualis/usage.html) · [Command line](https://certifie.github.io/qualis/cli.html) · [Configuration](https://certifie.github.io/qualis/configuration.html) · [CI integration](https://certifie.github.io/qualis/ci.html)
+More: [Analyze a repository](https://certifie.github.io/qualis/usage.html) · [Command line](https://certifie.github.io/qualis/cli.html) · [Configuration](https://certifie.github.io/qualis/configuration.html) · [CI integration](https://certifie.github.io/qualis/ci.html)
 
 ## 3. Plugins
 
@@ -96,7 +96,7 @@ npm install --save-dev qualis-plugin-yaml   # example name of a plugin published
 }
 ```
 
-The last entry is a plugin that runs as a separate program, here written in Python. Run `qualis rules` to check which rules are active. More: [Configuration → Plugins](https://certifie.github.io/qualis/configuration.html#plugins)
+The last entry is a plugin that runs as a separate program, here written in Python. Run `qualis rules` to check which rules are active. More: [Add plugins](https://certifie.github.io/qualis/add-plugins.html)
 
 ## 4. Install Qualis UI
 
@@ -109,7 +109,7 @@ docker run -d --name qualis-ui -p 3000:3000 \
   ghcr.io/certifie/qualis-ui:latest
 ```
 
-Open http://localhost:3000. The UI only reads your folders; it keeps its own data in the `qualis-data` volume. To run it from source instead, clone this repository and run `pnpm install && pnpm ui`. More: [Web UI](https://certifie.github.io/qualis/web-ui.html)
+Open http://localhost:3000. The UI only reads your folders; it keeps its own data in the `qualis-data` volume. To run it from source instead, clone this repository and run `pnpm install && pnpm ui`. More: [Install Qualis UI](https://certifie.github.io/qualis/ui-install.html)
 
 ## 5. Use Qualis UI with the CLI
 
@@ -117,7 +117,7 @@ Open http://localhost:3000. The UI only reads your folders; it keeps its own dat
 2. In Qualis UI choose **Import project** and pick the repository folder (with Docker, it is under `/workspace`).
 3. Every new `qualis analyze` appears in the UI by itself, with the history of the previous ones.
 
-No folder to share, for example when the analysis runs in CI? Choose **Read analysis** and upload the `report.json`. Several repositories of one product can be grouped in a **solution**.
+No folder to share, for example when the analysis runs in CI? Choose **Read analysis** and upload the `report.json`. Several repositories of one product can be grouped in a **solution**. More: [Use Qualis UI](https://certifie.github.io/qualis/web-ui.html)
 
 ## 6. Write a plugin
 
@@ -129,7 +129,7 @@ What you need:
 - **In any other language:** a program that reads and writes JSON-RPC 2.0 messages on stdin/stdout. [`examples/python-plugin`](examples/python-plugin) is a complete example using only the Python standard library.
 - **Rules with sources:** every rule links an official reference and has a compliant and a noncompliant example, which the tests run.
 
-Publish it in your own repository (for example as `qualis-plugin-<language>`) or propose it here. Start from [CONTRIBUTING.md → Writing a plugin](CONTRIBUTING.md#writing-a-plugin); the full protocol is in [Writing a plugin](https://certifie.github.io/qualis/plugins.html).
+Publish it in your own repository (for example as `qualis-plugin-<language>`) or propose it here. Start from [CONTRIBUTING.md → Writing a plugin](CONTRIBUTING.md#writing-a-plugin); what you need and the full protocol are in [Write a plugin](https://certifie.github.io/qualis/plugins.html).
 
 ## 7. Contribute
 
@@ -140,7 +140,7 @@ Qualis is open to everyone: bug reports, documentation, rules and plugins are we
 3. Make your change, with tests and documentation.
 4. Open a pull request against `main`.
 
-[CONTRIBUTING.md](CONTRIBUTING.md) explains the setup, the repository layout, the pull request checklist and how releases are made.
+[Contribute](https://certifie.github.io/qualis/contributing.html) has the short version; [CONTRIBUTING.md](CONTRIBUTING.md) explains the setup, the repository layout, the pull request checklist and how releases are made.
 
 ## More documentation
 

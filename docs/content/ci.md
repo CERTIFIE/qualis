@@ -39,7 +39,7 @@ jobs:
           sarif_file: .qualis/report.sarif
 ```
 
-The workflow runs the `qualis` of the project's development dependencies (see [Installation](installation.html#from-github-packages)). Since the package comes from GitHub Packages, give `npm ci` the registry and a token: commit the `.npmrc` with `{{npm-scope}}:registry=https://npm.pkg.github.com`, add `packages: read` to the permissions, and set `NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}` on the `npm ci` step (`actions/setup-node` with `registry-url: https://npm.pkg.github.com` writes the token line for you).
+The workflow runs the `qualis` of the project's development dependencies (see [Install the CLI](installation.html#or-add-it-to-a-project)). Since the package comes from GitHub Packages, give `npm ci` the registry and a token: commit the `.npmrc` with `{{npm-scope}}:registry=https://npm.pkg.github.com`, add `packages: read` to the permissions, and set `NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}` on the `npm ci` step (`actions/setup-node` with `registry-url: https://npm.pkg.github.com` writes the token line for you).
 
 ## Azure DevOps
 

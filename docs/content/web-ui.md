@@ -1,10 +1,25 @@
 ---
-title: Web UI
-description: Run the default web UI, import project folders, group projects in solutions and keep favorites.
+title: Use Qualis UI
+description: Connect a repository analyzed with the qualis command, browse its results, group projects in solutions and keep favorites.
 ---
-The web UI shows the projects, quality gates, issues, code, rules and history of your analyses. Any other tool can read the same [report format](report-format.html); this UI is the default one.
+Qualis UI shows the results of the `qualis` command: projects, quality gates, issues, code, rules and history. It reads the same [report format](report-format.html) that any other tool can read. To install it, see [Install Qualis UI](ui-install.html).
 
-## Two ways in
+## Connect a repository
+
+**Step 1.** Analyze the repository with the [CLI](usage.html). It writes `.qualis/report.json`, and keeps the previous analyses in `.qualis/history/`:
+
+```bash
+cd ~/projects/my-app
+qualis analyze
+```
+
+**Step 2.** Open Qualis UI (http://localhost:3000, see [Install Qualis UI](ui-install.html)), choose **Import project** and pick the repository folder in the folder browser. With Docker, the folders you mounted are under `/workspace`.
+
+**Step 3.** That's it: the UI reads `.qualis/` on every visit, so each new `qualis analyze` appears by itself, with the history of the previous ones. The UI never writes into the folder.
+
+When the UI can't see the folder, for example when the analysis runs in CI, publish `.qualis/report.json` as a build artifact and choose **Read analysis** to upload it instead.
+
+## Import project or Read analysis
 
 | | What you do | What the UI does |
 |---|---|---|
@@ -56,67 +71,6 @@ For a project imported from a folder that is a git repository, the UI compares t
 
 Nothing is shown for uploaded analyses, analyses without a branch or commit (detached HEAD, no git), or a branch the folder does not have. Answers are kept for 10 seconds.
 
-## Documentation
-
-**Docs** in the header opens this documentation inside the UI, with its own search: on the documentation pages the header search looks through the pages and the rules. The **?** next to the quality gate, the ratings, the coverage, the tests, the duplications, the technical debt and the metrics opens the page that explains them, and the **?** next to a rule's name opens the rule's page.
-
-`pnpm docs:build` writes the pages the UI shows (`docs/site/app`); `pnpm ui` builds them on its first run. Build them before `docker build` too: the image copies them.
-
-## Run it
-
-Every release publishes the web UI as a container image, `{{ui-image}}` (tag `latest` for official releases, `beta` for beta builds, or the exact version):
-
-```bash
-docker run -d --name qualis-ui -p 3000:3000 -v ~/projects:/workspace:ro -v qualis-data:/data {{ui-image}}:latest
-```
-
-Open http://localhost:3000 and import the projects found under `/workspace`.
-
-From a checkout of the repository:
-
-```bash
-pnpm ui
-```
-
-It serves http://localhost:3000, keeps its data in `.qualis-ui/` of the repository and lets Import project browse your home folder.
-
-To build the image yourself, from the repository root:
-
-```bash
-docker build -f apps/ui/Dockerfile -t qualis-ui .
-docker run --rm -p 3000:3000 -v ~/workspace:/workspace:ro -v qualis-data:/data qualis-ui
-```
-
-Mount the folders that contain your projects under `/workspace` (read-only is enough) and keep `/data` in a volume. The container runs as a non-root user and answers health checks on `/api/health`.
-
-| Variable | Default | Meaning |
-|---|---|---|
-| `QUALIS_DATA_DIR` | `/data` in Docker, `.qualis-ui/` with `pnpm ui` | Registered projects and solutions (`projects.json`) and uploaded analyses (`uploads/<project>/`). |
-| `QUALIS_BROWSE_ROOT` | `/workspace` in Docker, your home folder with `pnpm ui` | The only part of the disk the folder browser can see; symbolic links and `..` cannot leave it. |
-| `QUALIS_MAX_UPLOAD_MB` | `50` | Largest report.json Read analysis accepts. |
-| `QUALIS_SCAN_INTERVAL_MS` | `2000` | Minimum time between two reads of the project folders. |
-| `QUALIS_DOCS_DIR` | `/app/docs` in Docker, `docs/site/app` of the repository with `pnpm ui` | The documentation pages written by `pnpm docs:build`, shown under **Docs**. |
-| `PORT` | `3000` | HTTP port. |
-
-## Getting analyses into a project folder
-
-Run the analysis in the project; it writes `.qualis/report.json` and keeps the previous ones in `.qualis/history/` (the newest 20 by default, `output.history`):
-
-```bash
-qualis analyze
-```
-
-Or as a script of the project, with Qualis as a development dependency (see [Installation](installation.html#from-github-packages)):
-
-```json title="package.json"
-{
-  "scripts": { "analyze": "qualis analyze" },
-  "devDependencies": { "{{npm-scope}}/qualis": "^{{version}}" }
-}
-```
-
-Add `.qualis/` to `.gitignore`. In CI, publish `.qualis/report.json` as an artifact and add it with Read analysis, or analyse a checkout that the UI can see.
-
 ## The code view
 
 Reports do not embed the sources by default. The file view reads the file from the project folder and compares it with the `sha256` recorded in the report:
@@ -126,3 +80,9 @@ Reports do not embed the sources by default. The file view reads the file from t
 - **not available**: the file is gone, or the project has no folder (uploaded only): issues and coverage are listed by line.
 
 A report analysed with `--include-sources` (`output.includeSources`) carries the code itself and needs no folder.
+## Documentation
+
+**Docs** in the header opens this documentation inside the UI, with its own search: on the documentation pages the header search looks through the pages and the rules. The **?** next to the quality gate, the ratings, the coverage, the tests, the duplications, the technical debt and the metrics opens the page that explains them, and the **?** next to a rule's name opens the rule's page.
+
+The published image already contains them.
+

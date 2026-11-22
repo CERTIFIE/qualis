@@ -80,7 +80,7 @@ A maintainer reviews the pull request, may ask for changes, and merges it when i
 
 ## Writing a plugin
 
-A plugin teaches Qualis a language or adds rules to one. The core does everything else (duplication, coverage, tests, new code, ratings, quality gate, report), so a plugin stays small. The full contract is in [Writing a plugin](docs/content/plugins.md); this section is a short path through it.
+A plugin teaches Qualis a language or adds rules to one. The core does everything else (duplication, coverage, tests, new code, ratings, quality gate, report), so a plugin stays small. The full contract is in [Write a plugin](https://certifie.github.io/qualis/plugins.html); this section is a short path through it.
 
 ### Choose the kind and the transport
 
@@ -94,7 +94,7 @@ A plugin can run **in process**, as an npm package written in JavaScript or Type
 
 ### A minimal in-process plugin
 
-Outside this repository, add the plugin API to your package. It is published on GitHub Packages as `@certifie/qualis-plugin-api` (see [Installation](https://certifie.github.io/qualis/installation.html#from-github-packages) for the `.npmrc`); install it under its source name, so that the imports below work unchanged:
+Outside this repository, add the plugin API to your package. It is published on GitHub Packages as `@certifie/qualis-plugin-api` (see [Install the CLI](https://certifie.github.io/qualis/installation.html#or-add-it-to-a-project) for the `.npmrc`); install it under its source name, so that the imports below work unchanged:
 
 ```bash
 npm install @qualis/plugin-api@npm:@certifie/qualis-plugin-api

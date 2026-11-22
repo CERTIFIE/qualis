@@ -49,33 +49,7 @@ Each rule has a **scope**: `main` (production code), `test` (test code) or `all`
 
 ## Plugins
 
-`plugins` replaces the default list:
-
-```json
-["@qualis/plugin-typescript", "@qualis/plugin-csharp", "@qualis/plugin-eslint", "@qualis/plugin-roslyn"]
-```
-
-The first two are language plugins (they own `.ts`/`.js` and `.cs` files and measure them); the last two are [rule packs](plugins.html#language-plugins-and-rule-packs) that add the rules of ESLint and of the Microsoft .NET analyzers to those files. Each entry is a package name, a module with options, or a command for an out-of-process plugin:
-
-```json
-{
-  "plugins": [
-    { "module": "@qualis/plugin-typescript", "options": { "tsconfig": "tsconfig.app.json" } },
-    "@qualis/plugin-csharp",
-    { "command": "python3", "args": ["tools/qualis_python.py"], "options": {} }
-  ]
-}
-```
-
-| Plugin | Options |
-|---|---|
-| `@qualis/plugin-typescript` | `tsconfig`: path of the TypeScript configuration (default `tsconfig.json`). `typeCheck`: `false` disables the type-aware rules. |
-| `@qualis/plugin-eslint` | `typeChecked`: run the type-aware typescript-eslint rules (default: when `tsconfig.json` exists in the project root). |
-| `@qualis/plugin-roslyn` | `solution` or `projects`: what to load (default: the `.slnx`/`.sln` in the root, otherwise every `.csproj`). `restore`: `false` skips the automatic `dotnet restore` of projects that were never restored. |
-
-To add a plugin that is not bundled, install its package in the project (`npm install --save-dev <package>`), or point to its executable with `command`, and add it to `plugins` together with the bundled plugins you still want. Module names resolve from the project's `node_modules` first, then from the installation of the CLI. Run `qualis rules` to check the result.
-
-See [Writing a plugin](plugins.html) for the protocol.
+`plugins` lists the plugins to load, and replaces the default list. See [Add plugins](add-plugins.html) for the bundled plugins, their options and how to add others.
 
 ## Rules
 
