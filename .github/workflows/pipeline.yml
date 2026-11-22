@@ -1,7 +1,7 @@
 # Tests, packages, release and documentation of Qualis.
 #
 #   master (or main)  official release: version from package.json (changed by hand), tag vX.Y.Z,
-#                     npm tag "latest", image tag "latest", documentation at the root of GitHub Pages.
+#                     npm tag "latest" (GitHub Packages and npmjs), image tag "latest", documentation at the root of GitHub Pages.
 #                     When the tag vX.Y.Z already exists (version not changed), nothing is published:
 #                     the tests run and the documentation is deployed again.
 #   beta              beta release on every push: version X.Y.Z-beta.<build number>, prerelease,
@@ -194,6 +194,8 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
           NPM_TAG: ${{ needs.version.outputs.channel == 'beta' && 'beta' || 'latest' }}
+          # The tarballs name no registry: GitHub Packages here, npmjs in the npmjs job.
+          npm_config_registry: https://npm.pkg.github.com
         run: |
           for tgz in release/npm/*.tgz; do
             id=$(tar -xzOf "$tgz" package/package.json | node -p 'const p = JSON.parse(require("fs").readFileSync(0, "utf8")); `${p.name}@${p.version}`')
@@ -206,9 +208,77 @@ jobs:
             fi
           done
 
+  # npmjs (registry.npmjs.org), so that `npm install --global qualis` needs no .npmrc and no token. Same tarballs as
+  # GitHub Packages, plus the CLI under the unscoped name "qualis". Two ways to authenticate:
+  #   - secret NPM_TOKEN: a granular access token of the npm account that owns the scope, with read and write
+  #     access to its packages ("Bypass 2FA" enabled). Needed for the first publication of each package.
+  #   - trusted publishing (OIDC), once each package on npmjs trusts this repository and pipeline.yml: set the
+  #     repository variable NPMJS_TRUSTED_PUBLISHING to "true" and remove the secret.
+  # With neither, the job only prints a notice: the release goes on without npmjs.
+  npmjs:
+    name: npmjs
+    needs: [version, test, build]
+    if: needs.version.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # provenance statements and trusted publishing
+    outputs:
+      published: ${{ steps.publish.outputs.published }}
+    steps:
+      - id: auth
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          TRUSTED: ${{ vars.NPMJS_TRUSTED_PUBLISHING }}
+        run: |
+          if [ -n "$NPM_TOKEN" ]; then
+            echo "mode=token" >> "$GITHUB_OUTPUT"
+          elif [ "$TRUSTED" = "true" ]; then
+            echo "mode=oidc" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::npmjs skipped: set the NPM_TOKEN secret (or the NPMJS_TRUSTED_PUBLISHING variable) to publish there."
+            echo "mode=none" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.auth.outputs.mode != 'none'
+        uses: actions/download-artifact@v4
+        with:
+          name: release
+          path: release
+      - if: steps.auth.outputs.mode != 'none'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: https://registry.npmjs.org
+      # Trusted publishing needs npm 11.5.1 or later; Node.js 22 ships npm 10.
+      - if: steps.auth.outputs.mode != 'none'
+        run: npm install --global npm@11
+      - id: publish
+        if: steps.auth.outputs.mode != 'none'
+        env:
+          # Empty in OIDC mode: npm then exchanges the workflow's identity for a short-lived token.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TAG: ${{ needs.version.outputs.channel == 'beta' && 'beta' || 'latest' }}
+        run: |
+          # Dependencies first, so that a package is never published before the packages it needs.
+          declare -A seen
+          for tgz in release/npm/*-qualis-schema-*.tgz release/npm/*-qualis-plugin-api-*.tgz release/npm/*-qualis-core-*.tgz \
+                     release/npm/*-qualis-plugin-*.tgz release/npm/*.tgz release/npmjs/*.tgz; do
+            [ -f "$tgz" ] && [ -z "${seen[$tgz]:-}" ] || continue
+            seen[$tgz]=1
+            id=$(tar -xzOf "$tgz" package/package.json | node -p 'const p = JSON.parse(require("fs").readFileSync(0, "utf8")); `${p.name}@${p.version}`')
+            # A re-run after a partial failure skips the versions already published.
+            if npm view "$id" version --registry https://registry.npmjs.org > /dev/null 2>&1; then
+              echo "$id already published"
+            else
+              echo "Publishing $id ($NPM_TAG)"
+              npm publish "$tgz" --registry https://registry.npmjs.org --tag "$NPM_TAG" --access public --provenance
+            fi
+          done
+          echo "published=true" >> "$GITHUB_OUTPUT"
+
   release:
     name: GitHub Release
-    needs: [version, test, build, image, npm]
+    needs: [version, test, build, image, npm, npmjs]
     if: needs.version.outputs.publish == 'true'
     runs-on: ubuntu-latest
     permissions:
@@ -224,6 +294,7 @@ jobs:
           TAG: ${{ needs.version.outputs.tag }}
           VERSION: ${{ needs.version.outputs.version }}
           CHANNEL: ${{ needs.version.outputs.channel }}
+          NPMJS: ${{ needs.npmjs.outputs.published }}
         run: |
           owner="${GITHUB_REPOSITORY_OWNER,,}"
           repo="${GITHUB_REPOSITORY#*/}"
@@ -238,9 +309,15 @@ jobs:
             npmtag=""
             title="Qualis $VERSION"
           fi
+          if [ "$NPMJS" = "true" ]; then
+            npmjs="- npm: \`npm install --global qualis$npmtag\` ([npmjs](https://www.npmjs.com/package/qualis)), or \`npm install --save-dev qualis$npmtag\` in a project."
+          else
+            npmjs=""
+          fi
           cat > notes.md <<EOF
           ## Download
 
+          $npmjs
           - \`qualis-$VERSION.tar.gz\` (macOS, Linux) or \`qualis-$VERSION.zip\` (Windows): the \`qualis\` command with all its dependencies. Requires Node.js 20.19+; .NET SDK 10 enables the Roslyn rule pack.
           - npm packages on GitHub Packages: \`npm install --save-dev @$owner/qualis$npmtag\` (registry \`https://npm.pkg.github.com\`, see the [installation guide](${docs}installation.html)).
           - Web UI image: \`docker pull ghcr.io/${GITHUB_REPOSITORY,,}-ui:$VERSION\`

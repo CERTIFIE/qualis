@@ -94,7 +94,7 @@ A plugin can run **in process**, as an npm package written in JavaScript or Type
 
 ### A minimal in-process plugin
 
-Outside this repository, add the plugin API to your package. It is published on GitHub Packages as `@certifie/qualis-plugin-api` (see [Install the CLI](https://certifie.github.io/qualis/installation.html#or-add-it-to-a-project) for the `.npmrc`); install it under its source name, so that the imports below work unchanged:
+Outside this repository, add the plugin API to your package. It is published on npmjs as `@certifie/qualis-plugin-api`; install it under its source name, so that the imports below work unchanged:
 
 ```bash
 npm install @qualis/plugin-api@npm:@certifie/qualis-plugin-api
@@ -162,7 +162,7 @@ The [pipeline](.github/workflows/pipeline.yml) runs the tests on every pull requ
 | `main` | `version` of the root `package.json`, changed by hand | `vX.Y.Z`, latest | `latest` | https://certifie.github.io/qualis/ |
 | `beta` | `X.Y.Z-beta.<build number>` | `vX.Y.Z-beta.N`, prerelease | `beta` | https://certifie.github.io/qualis/beta/ |
 
-A release contains the `qualis` command with its dependencies (`qualis-X.Y.Z.tar.gz` / `.zip`), the npm tarballs, the documentation site and `SHA256SUMS.txt`. The npm packages are published on GitHub Packages as `@certifie/qualis`, `@certifie/qualis-core`, ... (GitHub Packages requires the owner's scope; the dependencies between them are npm aliases of `@qualis/*`), and the web UI as the `ghcr.io/certifie/qualis-ui` image. When the tag of the current version already exists, nothing is published: bump `version` in `package.json` to release. `node scripts/release/version.mjs` and `node scripts/release/pack.mjs` reproduce the version and the packages locally (output in `release/`).
+A release contains the `qualis` command with its dependencies (`qualis-X.Y.Z.tar.gz` / `.zip`), the npm tarballs, the documentation site and `SHA256SUMS.txt`. The npm packages are published on npmjs and on GitHub Packages as `@certifie/qualis`, `@certifie/qualis-core`, ... (GitHub Packages requires the owner's scope; the dependencies between them are npm aliases of `@qualis/*`), the CLI also as `qualis` on npmjs (the `npmjs` job needs the `NPM_TOKEN` secret, a granular token of the npm user `certifie`, or trusted publishing with the `NPMJS_TRUSTED_PUBLISHING` variable set to `true`; without either it is skipped), and the web UI as the `ghcr.io/certifie/qualis-ui` image. When the tag of the current version already exists, nothing is published: bump `version` in `package.json` to release. `node scripts/release/version.mjs` and `node scripts/release/pack.mjs` reproduce the version and the packages locally (output in `release/`).
 
 ## Forks
 

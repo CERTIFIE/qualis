@@ -17,7 +17,7 @@ In both cases every rule needs at least one reference to an official source, and
 
 **Step 1. Choose the kind.** A *language plugin* owns files by extension and measures them; a *rule pack* adds rules to the files of an existing language plugin. See [below](#language-plugins-and-rule-packs).
 
-**Step 2. Start from an example.** For JavaScript, copy the [minimal plugin](#in-process-plugins-javascript); outside this repository install the API under its source name, so the imports work unchanged: `npm install @qualis/plugin-api@npm:{{npm-scope}}/qualis-plugin-api` (GitHub Packages, see [Install the CLI](installation.html#or-add-it-to-a-project)). For another language, copy [`examples/python-plugin`]({{tree-url}}/examples/python-plugin), a complete plugin written with the Python standard library.
+**Step 2. Start from an example.** For JavaScript, copy the [minimal plugin](#in-process-plugins-javascript); outside this repository install the API under its source name, so the imports work unchanged: `npm install @qualis/plugin-api@npm:{{npm-scope}}/qualis-plugin-api` (from npmjs). For another language, copy [`examples/python-plugin`]({{tree-url}}/examples/python-plugin), a complete plugin written with the Python standard library.
 
 **Step 3. Define the rules and analyze each file.** Return the issues of the enabled rules and, for a language plugin, the measures of the file (see [The contract](#the-contract)).
 
