@@ -64,6 +64,14 @@ Nothing is shown for uploaded analyses, analyses without a branch or commit (det
 
 ## Run it
 
+Every release publishes the web UI as a container image, `{{ui-image}}` (tag `latest` for official releases, `beta` for beta builds, or the exact version):
+
+```bash
+docker run -d --name qualis-ui -p 3000:3000 -v ~/projects:/workspace:ro -v qualis-data:/data {{ui-image}}:latest
+```
+
+Open http://localhost:3000 and import the projects found under `/workspace`.
+
 From a checkout of the repository:
 
 ```bash
@@ -72,7 +80,7 @@ pnpm ui
 
 It serves http://localhost:3000, keeps its data in `.qualis-ui/` of the repository and lets Import project browse your home folder.
 
-With Docker, built from the repository root:
+To build the image yourself, from the repository root:
 
 ```bash
 docker build -f apps/ui/Dockerfile -t qualis-ui .
@@ -95,15 +103,15 @@ Mount the folders that contain your projects under `/workspace` (read-only is en
 Run the analysis in the project; it writes `.qualis/report.json` and keeps the previous ones in `.qualis/history/` (the newest 20 by default, `output.history`):
 
 ```bash
-npx qualis analyze
+qualis analyze
 ```
 
-Or as a script of the project:
+Or as a script of the project, with Qualis as a development dependency (see [Installation](installation.html#from-github-packages)):
 
 ```json title="package.json"
 {
   "scripts": { "analyze": "qualis analyze" },
-  "devDependencies": { "qualis": "^0.1.0" }
+  "devDependencies": { "{{npm-scope}}/qualis": "^{{version}}" }
 }
 ```
 

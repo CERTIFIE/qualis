@@ -17,20 +17,11 @@ Qualis analyzes source code and answers one question for a team: **is this chang
 
 ## Your first analysis
 
-```bash tab=npm
-npx qualis analyze .
-```
+[Install the qualis command](installation.html), then run it in the root of your repository:
 
-```bash tab=pnpm
-pnpm dlx qualis analyze .
+```bash
+qualis analyze
 ```
-
-```bash tab=bun
-bunx qualis analyze .
-```
-
-> [!NOTE]
-> Qualis 0.1.0 is not yet published to npm. Until then, run Qualis from source as described in [Installation](installation.html).
 
 The command prints a summary, writes `.qualis/report.json` and exits with `0` when the quality gate passes, `1` when it fails and `2` on errors.
 

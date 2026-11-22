@@ -73,6 +73,8 @@ The first two are language plugins (they own `.ts`/`.js` and `.cs` files and mea
 | `@qualis/plugin-eslint` | `typeChecked`: run the type-aware typescript-eslint rules (default: when `tsconfig.json` exists in the project root). |
 | `@qualis/plugin-roslyn` | `solution` or `projects`: what to load (default: the `.slnx`/`.sln` in the root, otherwise every `.csproj`). `restore`: `false` skips the automatic `dotnet restore` of projects that were never restored. |
 
+To add a plugin that is not bundled, install its package in the project (`npm install --save-dev <package>`), or point to its executable with `command`, and add it to `plugins` together with the bundled plugins you still want. Module names resolve from the project's `node_modules` first, then from the installation of the CLI. Run `qualis rules` to check the result.
+
 See [Writing a plugin](plugins.html) for the protocol.
 
 ## Rules

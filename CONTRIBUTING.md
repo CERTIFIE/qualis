@@ -29,7 +29,38 @@ pnpm test           # build, then run all the tests with vitest
 pnpm qualis analyze path/to/project   # run the local qualis command
 ```
 
-`pnpm test:watch` reruns the tests on every change, and `pnpm vitest run plugins/csharp` runs the tests of one package (after `pnpm build`). The layout of the repository is described in the [README](README.md#development).
+`pnpm test:watch` reruns the tests on every change, and `pnpm vitest run plugins/csharp` runs the tests of one package (after `pnpm build`).
+
+Other scripts:
+
+```bash
+pnpm typecheck      # type-check every package
+pnpm docs:build     # build, then generate the documentation site in docs/site
+pnpm docs:serve     # serve docs/site on http://localhost:4321 (PORT changes the port)
+pnpm ui             # web UI on http://localhost:3000 (data in .qualis-ui/)
+pnpm ui:dev         # the same with the Next.js development server
+pnpm ui:build       # production build of the web UI
+```
+
+To use your checkout as the `qualis` command in any folder, run `npm install --global ./packages/cli`: npm links it to the checkout, so after `pnpm build` the command runs your latest code.
+
+### Repository layout
+
+```text
+packages/schema        JSON Schemas and TypeScript types (report, config, plugin protocol)
+packages/plugin-api    Plugin contract, stdio protocol, helpers (Halstead, suppressions, line index)
+packages/core          Engine: plugin host, git new code, duplication, coverage, tests, metrics, gate, SARIF
+packages/cli           `qualis` command
+plugins/typescript     TypeScript/JavaScript plugin
+plugins/csharp         C# plugin (tree-sitter)
+plugins/eslint         ESLint + typescript-eslint rule pack
+plugins/roslyn         Roslyn rule pack (C# helper in dotnet/, npm wrapper in src/)
+examples/python-plugin Plugin written in Python (stdio)
+apps/ui                Web UI (Next.js); Docker image in apps/ui/Dockerfile
+docs                   Documentation site: pages in docs/content/, generator in docs/build/
+```
+
+The documentation site is generated from `docs/content/*.md`, the rule metadata of the plugins and the published schemas. The rule pages, with their sources and examples, are generated: change the rule definition, not the page.
 
 ## Pull requests
 
@@ -62,6 +93,12 @@ A plugin teaches Qualis a language or adds rules to one. The core does everythin
 A plugin can run **in process**, as an npm package written in JavaScript or TypeScript, or **out of process**, as any executable that speaks JSON-RPC 2.0 over stdin/stdout, so it can be written in any language. [`examples/python-plugin`](examples/python-plugin) is a complete out-of-process plugin written in Python with only the standard library.
 
 ### A minimal in-process plugin
+
+Outside this repository, add the plugin API to your package. It is published on GitHub Packages as `@certifie/qualis-plugin-api` (see [Installation](https://certifie.github.io/qualis/installation.html#from-github-packages) for the `.npmrc`); install it under its source name, so that the imports below work unchanged:
+
+```bash
+npm install @qualis/plugin-api@npm:@certifie/qualis-plugin-api
+```
 
 ```ts
 import { definePlugin, defineRule, LineIndex, PLUGIN_API_VERSION } from "@qualis/plugin-api";
@@ -115,6 +152,17 @@ Every rule must have at least one reference to a published authority (the langua
 
 - **In your own repository**: you own it and choose its license; Qualis loads any npm package or executable. Name it, for example, `qualis-plugin-<language>`, say that it is a plugin for Qualis, and open an issue so that we can list it in the documentation.
 - **In this repository**: add it under `plugins/<name>` with its own `package.json` (`"license": "Apache-2.0"`), `tsconfig.json` and `test/`, add it to the references of the root `tsconfig.json`, and propose it in a pull request. Plugins bundled by default are listed in `packages/core/src/config.ts`, and the documentation site reads their rules through `docs/package.json`. Open an issue first to discuss a new bundled plugin.
+
+## Releases
+
+The [pipeline](.github/workflows/pipeline.yml) runs the tests on every pull request and push, and publishes from two branches:
+
+| Branch | Version | Release | npm tag / image tag | Documentation |
+|---|---|---|---|---|
+| `main` | `version` of the root `package.json`, changed by hand | `vX.Y.Z`, latest | `latest` | https://certifie.github.io/qualis/ |
+| `beta` | `X.Y.Z-beta.<build number>` | `vX.Y.Z-beta.N`, prerelease | `beta` | https://certifie.github.io/qualis/beta/ |
+
+A release contains the `qualis` command with its dependencies (`qualis-X.Y.Z.tar.gz` / `.zip`), the npm tarballs, the documentation site and `SHA256SUMS.txt`. The npm packages are published on GitHub Packages as `@certifie/qualis`, `@certifie/qualis-core`, ... (GitHub Packages requires the owner's scope; the dependencies between them are npm aliases of `@qualis/*`), and the web UI as the `ghcr.io/certifie/qualis-ui` image. When the tag of the current version already exists, nothing is published: bump `version` in `package.json` to release. `node scripts/release/version.mjs` and `node scripts/release/pack.mjs` reproduce the version and the packages locally (output in `release/`).
 
 ## Forks
 
