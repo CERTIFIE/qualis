@@ -13,23 +13,23 @@ description: Install the qualis command from npm, globally or as a development d
 Install the `qualis` command from npm:
 
 ```bash
-npm install --global qualis{{npm-tag}}
+npm install --global {{npm-scope}}/qualis{{npm-tag}}
 qualis --version
 ```
 
-No `.npmrc` or token is needed: the packages are public on [npmjs](https://www.npmjs.com/package/qualis). To update it, run the same command again; to remove it: `npm uninstall --global qualis`.
+The package is `{{npm-scope}}/qualis`, the command is `qualis`. No `.npmrc` or token is needed: the packages are public on [npmjs](https://www.npmjs.com/package/{{npm-scope}}/qualis). To update it, run the same command again; to remove it: `npm uninstall --global {{npm-scope}}/qualis`.
 
 ## Or add it to a project
 
 To give every developer and the CI the same version, add Qualis as a development dependency (official releases have the `latest` tag, beta builds the `beta` tag):
 
 ```bash tab=npm
-npm install --save-dev qualis{{npm-tag}}
+npm install --save-dev {{npm-scope}}/qualis{{npm-tag}}
 npx qualis analyze
 ```
 
 ```bash tab=pnpm
-pnpm add --save-dev qualis{{npm-tag}}
+pnpm add --save-dev {{npm-scope}}/qualis{{npm-tag}}
 pnpm qualis analyze
 ```
 
@@ -58,7 +58,7 @@ The same packages are also on [GitHub Packages]({{repo-url}}/packages) as `{{npm
 //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
-Then install `{{npm-scope}}/qualis{{npm-tag}}` instead of `qualis`. In GitHub Actions the workflow's own `GITHUB_TOKEN` is enough, with `permissions: packages: read`.
+The scope line makes npm take every `{{npm-scope}}` package from GitHub Packages; the install commands above stay the same. In GitHub Actions the workflow's own `GITHUB_TOKEN` is enough, with `permissions: packages: read`.
 
 ## Check the installation
 
@@ -77,7 +77,7 @@ The CLI depends on all the packages below, so installing it installs them too. I
 
 | Package | Published as | Purpose |
 |---|---|---|
-| [`qualis`]({{tree-url}}/packages/cli) | `qualis` (npmjs), `{{npm-scope}}/qualis` | Command line interface; depends on the bundled plugins. |
+| [`qualis`]({{tree-url}}/packages/cli) | `{{npm-scope}}/qualis` (also `qualis` on npmjs) | Command line interface; depends on the bundled plugins. |
 | [`@qualis/core`]({{tree-url}}/packages/core) | `{{npm-scope}}/qualis-core` | Analysis engine, usable as a library (`analyze()`, `writeReport()`). |
 | [`@qualis/schema`]({{tree-url}}/packages/schema) | `{{npm-scope}}/qualis-schema` | JSON Schemas and TypeScript types of the report, configuration and plugin protocol. |
 | [`@qualis/plugin-api`]({{tree-url}}/packages/plugin-api) | `{{npm-scope}}/qualis-plugin-api` | Contract and helpers for [writing plugins](plugins.html). |

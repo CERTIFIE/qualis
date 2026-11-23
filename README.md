@@ -37,11 +37,11 @@ your repository ──► qualis analyze ──► results in the terminal
 You need **Node.js 20.19** or later and **git**. The **.NET SDK 10** is optional: it enables the Microsoft analyzers for C#.
 
 ```bash
-npm install --global qualis
+npm install --global @certifie/qualis
 qualis --version
 ```
 
-The packages are public on [npmjs](https://www.npmjs.com/package/qualis), so no `.npmrc` or token is needed. To pin the version in a project, add it as a development dependency: `npm install --save-dev qualis`. Without access to npmjs, download `qualis-<version>.tar.gz` (macOS, Linux) or `qualis-<version>.zip` (Windows) from the [latest release](https://github.com/CERTIFIE/qualis/releases/latest) and run `npm install --global ./qualis-<version>` on the extracted folder. See [Install the CLI](https://certifie.github.io/qualis/installation.html).
+The packages are public on [npmjs](https://www.npmjs.com/package/@certifie/qualis), so no `.npmrc` or token is needed, and the command is `qualis`. To pin the version in a project, add it as a development dependency: `npm install --save-dev @certifie/qualis`. Without access to npmjs, download `qualis-<version>.tar.gz` (macOS, Linux) or `qualis-<version>.zip` (Windows) from the [latest release](https://github.com/CERTIFIE/qualis/releases/latest) and run `npm install --global ./qualis-<version>` on the extracted folder. See [Install the CLI](https://certifie.github.io/qualis/installation.html).
 
 ## 2. Use the CLI
 
