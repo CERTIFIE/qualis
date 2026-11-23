@@ -25,7 +25,7 @@ const VERSION = JSON.parse(await readFile(path.join(DOCS, "package.json"), "utf8
 const REPOSITORY = process.env.QUALIS_REPOSITORY ?? process.env.GITHUB_REPOSITORY ?? "CERTIFIE/qualis";
 const [REPO_OWNER, REPO_NAME] = REPOSITORY.split("/");
 const REPO_URL = `https://github.com/${REPOSITORY}`;
-/** stable (master), beta, or dev for a local build that is not a release. */
+/** stable (tag vX.Y.Z), beta (tag vX.Y.Z-beta.N), or dev for a build that is not a release. */
 const CHANNEL = process.env.QUALIS_CHANNEL ?? "dev";
 /** Commit or branch the "source" links point to. */
 const SOURCE_REF = process.env.QUALIS_SOURCE_REF ?? process.env.GITHUB_SHA ?? "main";

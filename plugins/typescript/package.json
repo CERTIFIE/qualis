@@ -1,6 +1,6 @@
 {
   "name": "@qualis/plugin-typescript",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Qualis language plugin for TypeScript and JavaScript, built on the TypeScript compiler API.",
   "license": "Apache-2.0",
   "type": "module",

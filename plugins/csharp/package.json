@@ -1,6 +1,6 @@
 {
   "name": "@qualis/plugin-csharp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Qualis language plugin for C#, built on tree-sitter (WebAssembly).",
   "license": "Apache-2.0",
   "type": "module",

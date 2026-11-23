@@ -1,10 +1,13 @@
 // Computes the release version for the CI and, with --apply, writes it into every workspace package.json.
 //
-//   node scripts/release/version.mjs --channel stable            -> 0.2.0        (version of the root package.json)
-//   node scripts/release/version.mjs --channel beta --build 42   -> 0.2.0-beta.42
-//   node scripts/release/version.mjs --channel beta --build 42 --apply
+//   node scripts/release/version.mjs --tag v0.2.0                -> 0.2.0          (stable: npm tag "latest")
+//   node scripts/release/version.mjs --tag v0.2.0-beta.1         -> 0.2.0-beta.1   (prerelease: npm tag "beta")
+//   node scripts/release/version.mjs                             -> version of the root package.json (not a release)
+//   node scripts/release/version.mjs --tag v0.2.0 --apply
 //
-// Prints the version on stdout; in GitHub Actions it also writes version, tag and prerelease to $GITHUB_OUTPUT.
+// Releases are made by pushing a tag vX.Y.Z (or vX.Y.Z-<prerelease>): the tag is the version, package.json does
+// not need to be changed. Prints the version on stdout; in GitHub Actions it also writes version, tag, channel and
+// prerelease to $GITHUB_OUTPUT.
 import { appendFileSync, readFileSync, readdirSync, existsSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -13,24 +16,26 @@ import { parseArgs } from "node:util";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const { values } = parseArgs({
   options: {
-    channel: { type: "string", default: "stable" },
-    build: { type: "string" },
+    tag: { type: "string" },
     apply: { type: "boolean", default: false },
   },
 });
 
 const readJson = (file) => JSON.parse(readFileSync(file, "utf8"));
-const base = readJson(path.join(root, "package.json")).version;
-if (!/^\d+\.\d+\.\d+$/.test(base)) {
-  throw new Error(`package.json: version "${base}" must be MAJOR.MINOR.PATCH (the beta suffix is added by the pipeline).`);
-}
+const SEMVER = /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
 
 let version;
-if (values.channel === "stable") version = base;
-else if (values.channel === "beta") {
-  if (!/^\d+$/.test(values.build ?? "")) throw new Error("--build <number> is required for the beta channel.");
-  version = `${base}-beta.${values.build}`;
-} else throw new Error(`Unknown channel "${values.channel}" (stable or beta).`);
+if (values.tag !== undefined) {
+  if (!values.tag.startsWith("v") || !SEMVER.test(values.tag.slice(1))) {
+    throw new Error(`Tag "${values.tag}" is not a release tag: use vMAJOR.MINOR.PATCH, or vMAJOR.MINOR.PATCH-beta.N for a prerelease.`);
+  }
+  version = values.tag.slice(1);
+} else {
+  version = readJson(path.join(root, "package.json")).version;
+  if (!SEMVER.test(version)) throw new Error(`package.json: version "${version}" is not MAJOR.MINOR.PATCH.`);
+}
+const prerelease = SEMVER.exec(version)[4] !== undefined;
+const channel = prerelease ? "beta" : "stable";
 
 /** Every package.json of the workspace (pnpm-workspace.yaml: packages/*, apps/*, plugins/*, docs) and the root. */
 export function workspaceManifests() {
@@ -55,5 +60,5 @@ if (values.apply) {
 
 console.log(version);
 if (process.env.GITHUB_OUTPUT) {
-  appendFileSync(process.env.GITHUB_OUTPUT, `version=${version}\ntag=v${version}\nprerelease=${values.channel === "beta"}\n`);
+  appendFileSync(process.env.GITHUB_OUTPUT, `version=${version}\ntag=v${version}\nchannel=${channel}\nprerelease=${prerelease}\n`);
 }
