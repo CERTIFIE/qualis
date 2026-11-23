@@ -1,6 +1,6 @@
 {
   "name": "@qualis/ui",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Default web UI of Qualis: reads report.json files from a folder and shows projects, quality gates, issues, code and rules.",
   "license": "Apache-2.0",

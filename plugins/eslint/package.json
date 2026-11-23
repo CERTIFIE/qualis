@@ -1,6 +1,6 @@
 {
   "name": "@qualis/plugin-eslint",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Qualis rule pack running the ESLint and typescript-eslint recommended rules on TypeScript and JavaScript files.",
   "license": "Apache-2.0",
   "type": "module",

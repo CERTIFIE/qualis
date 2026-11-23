@@ -1,7 +1,7 @@
 {
   "name": "qualis-monorepo",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Qualis: open static code analysis with pluggable language analyzers, an open report format and quality gates.",
   "license": "Apache-2.0",
   "type": "module",

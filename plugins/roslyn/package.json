@@ -1,6 +1,6 @@
 {
   "name": "@qualis/plugin-roslyn",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Qualis rule pack running the Microsoft .NET code analysis rules (CA) with Roslyn, out of process over the stdio protocol.",
   "license": "Apache-2.0",
   "type": "module",

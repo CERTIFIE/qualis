@@ -1,6 +1,6 @@
 {
   "name": "@qualis/plugin-api",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Contract and helpers for writing Qualis language plugins, in-process (JavaScript) or out-of-process (any language, JSON-RPC over stdio).",
   "license": "Apache-2.0",
   "type": "module",

@@ -1,6 +1,6 @@
 {
   "name": "@qualis/schema",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Open data contracts of Qualis: report, configuration and plugin protocol (JSON Schema + TypeScript types).",
   "license": "Apache-2.0",
   "type": "module",
