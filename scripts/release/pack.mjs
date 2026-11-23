@@ -99,8 +99,8 @@ function packageReadme(sourceName, manifest) {
   const site = `https://${owner.toLowerCase()}.github.io/${repoName}/`;
   const install =
     sourceName === "qualis"
-      ? "```bash\nnpm install --global qualis\nqualis analyze\n```\n\nOr as a development dependency of a project: `npm install --save-dev qualis`, then `npx qualis analyze`."
-      : `This package is installed with the \`qualis\` command line (\`npm install --global qualis\`). To use it on its own, install it under its source name, so that the imports work unchanged:\n\n\`\`\`bash\nnpm install ${sourceName}@npm:${manifest.name}\n\`\`\``;
+      ? `\`\`\`bash\nnpm install --global ${scope}/qualis\nqualis analyze\n\`\`\`\n\nOr as a development dependency of a project: \`npm install --save-dev ${scope}/qualis\`, then \`npx qualis analyze\`.`
+      : `This package is installed with the \`qualis\` command line (\`npm install --global ${scope}/qualis\`). To use it on its own, install it under its source name, so that the imports work unchanged:\n\n\`\`\`bash\nnpm install ${sourceName}@npm:${manifest.name}\n\`\`\``;
   return `# ${manifest.name}
 
 ${manifest.description ?? "Part of Qualis, open static code analysis."}

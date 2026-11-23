@@ -219,7 +219,7 @@ jobs:
             fi
           done
 
-  # npmjs (registry.npmjs.org), so that `npm install --global qualis` needs no .npmrc and no token. Same tarballs as
+  # npmjs (registry.npmjs.org), so that `npm install --global @certifie/qualis` needs no .npmrc and no token. Same tarballs as
   # GitHub Packages, plus the CLI under the unscoped name "qualis". Two ways to authenticate:
   #   - secret NPM_TOKEN: a granular access token of the npm account that owns the scope, with read and write
   #     access to its packages ("Bypass 2FA" enabled). Needed for the first publication of each package.
@@ -321,7 +321,7 @@ jobs:
             title="Qualis $VERSION"
           fi
           if [ "$NPMJS" = "true" ]; then
-            npmjs="- npm: \`npm install --global qualis$npmtag\` ([npmjs](https://www.npmjs.com/package/qualis)), or \`npm install --save-dev qualis$npmtag\` in a project."
+            npmjs="- npm: \`npm install --global @$owner/qualis$npmtag\` ([npmjs](https://www.npmjs.com/package/@$owner/qualis)), or \`npm install --save-dev @$owner/qualis$npmtag\` in a project."
           else
             npmjs=""
           fi
