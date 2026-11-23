@@ -1,17 +1,19 @@
 # Tests, packages, release and documentation of Qualis.
 #
-#   master (or main)  official release: version from package.json (changed by hand), tag vX.Y.Z,
-#                     npm tag "latest" (GitHub Packages and npmjs), image tag "latest", documentation at the root of GitHub Pages.
-#                     When the tag vX.Y.Z already exists (version not changed), nothing is published:
-#                     the tests run and the documentation is deployed again.
-#   beta              beta release on every push: version X.Y.Z-beta.<build number>, prerelease,
-#                     npm tag "beta", image tag "beta", documentation under /beta/ on GitHub Pages.
-#   pull requests     tests, plus a dry run of the packages, the documentation and the image (nothing is published).
+#   tag vX.Y.Z          official release: version from the tag, npm tag "latest" (npmjs and GitHub Packages),
+#                       image tag "latest", documentation at the root of GitHub Pages. The tagged commit must be on main.
+#   tag vX.Y.Z-beta.N   prerelease (any suffix after "-", e.g. -rc.1): npm tag "beta", image tag "beta",
+#                       documentation under /beta/ on GitHub Pages.
+#   branches, pull requests
+#                       tests, plus a dry run of the packages, the documentation and the image: nothing is published.
+#
+# To release: git tag v0.2.0 && git push origin v0.2.0 (or create the release tag from the GitHub Releases page).
 name: pipeline
 
 on:
   push:
     branches: [master, main, beta]
+    tags: ["v*"]
   pull_request:
   workflow_dispatch:
 
@@ -53,35 +55,44 @@ jobs:
     name: Version
     runs-on: ubuntu-latest
     outputs:
-      channel: ${{ steps.channel.outputs.channel }}
+      channel: ${{ steps.version.outputs.channel }}
+      docs-channel: ${{ steps.channel.outputs.channel }}
       version: ${{ steps.version.outputs.version }}
       tag: ${{ steps.version.outputs.tag }}
       prerelease: ${{ steps.version.outputs.prerelease }}
       publish: ${{ steps.publish.outputs.publish }}
     steps:
       - uses: actions/checkout@v4
-      - id: channel
-        run: |
-          if [ "$GITHUB_REF_NAME" = "beta" ] || [ "$GITHUB_BASE_REF" = "beta" ]; then
-            echo "channel=beta" >> "$GITHUB_OUTPUT"
-          else
-            echo "channel=stable" >> "$GITHUB_OUTPUT"
-          fi
+        with:
+          fetch-depth: 0 # to check that a stable tag is on the default branch
       - id: version
-        run: node scripts/release/version.mjs --channel "${{ steps.channel.outputs.channel }}" --build "${{ github.run_number }}"
+        run: |
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            node scripts/release/version.mjs --tag "$GITHUB_REF_NAME"
+          else
+            node scripts/release/version.mjs
+          fi
+      - id: channel
+        env:
+          CHANNEL: ${{ steps.version.outputs.channel }}
+        run: |
+          # Documentation of a build that is not a release: no download links, "development" label.
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then echo "channel=$CHANNEL"; else echo "channel=dev"; fi >> "$GITHUB_OUTPUT"
       - id: publish
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.version.outputs.tag }}
+          PRERELEASE: ${{ steps.version.outputs.prerelease }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
-          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
-            echo "Pull request: dry run, nothing is published."
+          if [ "$GITHUB_REF_TYPE" != "tag" ]; then
+            echo "::notice::Not a tag: dry run, nothing is published. To release, push a tag vX.Y.Z."
             echo "publish=false" >> "$GITHUB_OUTPUT"
-          elif [[ ! "$GITHUB_REF_NAME" =~ ^(master|main|beta)$ ]]; then
-            echo "::notice::Only master, main and beta publish releases: $GITHUB_REF_NAME is a dry run."
-            echo "publish=false" >> "$GITHUB_OUTPUT"
+          elif [ "$PRERELEASE" != "true" ] && ! git merge-base --is-ancestor "$GITHUB_SHA" "origin/$DEFAULT_BRANCH"; then
+            echo "::error::$TAG is an official release but its commit is not on $DEFAULT_BRANCH: tag a commit of $DEFAULT_BRANCH, or use a prerelease tag (vX.Y.Z-beta.N)."
+            exit 1
           elif gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
-            echo "::notice::Release $TAG already exists: change the version in package.json to publish a new release."
+            echo "::notice::Release $TAG already exists: nothing is published. Push a new tag to release."
             echo "publish=false" >> "$GITHUB_OUTPUT"
           else
             echo "publish=true" >> "$GITHUB_OUTPUT"
@@ -103,11 +114,11 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
       - run: pnpm install --frozen-lockfile
       - name: Set version ${{ needs.version.outputs.version }}
-        run: node scripts/release/version.mjs --channel "${{ needs.version.outputs.channel }}" --build "${{ github.run_number }}" --apply
+        run: node scripts/release/version.mjs --tag "${{ needs.version.outputs.tag }}" --apply
       - run: pnpm build
       - name: Documentation
         env:
-          QUALIS_CHANNEL: ${{ needs.version.outputs.channel }}
+          QUALIS_CHANNEL: ${{ needs.version.outputs.docs-channel }}
           QUALIS_SOURCE_REF: ${{ github.sha }}
         run: pnpm --filter @qualis/docs build
       - name: Pack
@@ -135,7 +146,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set version ${{ needs.version.outputs.version }}
-        run: node scripts/release/version.mjs --channel "${{ needs.version.outputs.channel }}" --build "${{ github.run_number }}" --apply
+        run: node scripts/release/version.mjs --tag "${{ needs.version.outputs.tag }}" --apply
       - uses: actions/download-artifact@v4
         with:
           name: docs-site
@@ -336,11 +347,11 @@ jobs:
   pages-build:
     name: GitHub Pages (site)
     needs: [version, test, build, release]
-    # Also when the release was skipped (master without a version change): the documentation is still deployed.
+    # Only for a release tag: the published documentation always matches a published version. Also when the release
+    # already existed (re-run of a tag), so that the documentation can be deployed again.
     if: >-
-      always() && github.event_name != 'pull_request'
-      && needs.test.result == 'success' && needs.build.result == 'success'
-      && contains(fromJSON('["master", "main", "beta"]'), github.ref_name)
+      always() && github.ref_type == 'tag'
+      && needs.test.result == 'success' && needs.build.result == 'success' && needs.version.result == 'success'
       && (needs.release.result == 'success' || needs.version.outputs.publish != 'true')
     runs-on: ubuntu-latest
     permissions:
@@ -387,7 +398,7 @@ jobs:
   pages:
     name: GitHub Pages
     needs: pages-build
-    # Without always() the job inherits the skip of release (no new version on master), even when the site was built.
+    # Without always() the job inherits the skip of release (re-run of an existing release), even when the site was built.
     if: always() && needs.pages-build.result == 'success'
     runs-on: ubuntu-latest
     permissions:

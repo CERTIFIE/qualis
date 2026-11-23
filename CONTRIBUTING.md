@@ -155,14 +155,24 @@ Every rule must have at least one reference to a published authority (the langua
 
 ## Releases
 
-The [pipeline](.github/workflows/pipeline.yml) runs the tests on every pull request and push, and publishes from two branches:
+The [pipeline](.github/workflows/pipeline.yml) runs the tests on every pull request and push, with a dry run of the packages, the documentation and the image. It publishes only when a release tag is pushed:
 
-| Branch | Version | Release | npm tag / image tag | Documentation |
-|---|---|---|---|---|
-| `main` | `version` of the root `package.json`, changed by hand | `vX.Y.Z`, latest | `latest` | https://certifie.github.io/qualis/ |
-| `beta` | `X.Y.Z-beta.<build number>` | `vX.Y.Z-beta.N`, prerelease | `beta` | https://certifie.github.io/qualis/beta/ |
+| Tag | Release | npm tag / image tag | Documentation |
+|---|---|---|---|
+| `vX.Y.Z` (on a commit of `main`) | `vX.Y.Z`, latest | `latest` | https://certifie.github.io/qualis/ |
+| `vX.Y.Z-beta.N` (any suffix after `-`, e.g. `-rc.1`; any branch) | `vX.Y.Z-beta.N`, prerelease | `beta` | https://certifie.github.io/qualis/beta/ |
 
-A release contains the `qualis` command with its dependencies (`qualis-X.Y.Z.tar.gz` / `.zip`), the npm tarballs, the documentation site and `SHA256SUMS.txt`. The npm packages are published on npmjs and on GitHub Packages as `@certifie/qualis`, `@certifie/qualis-core`, ... (GitHub Packages requires the owner's scope; the dependencies between them are npm aliases of `@qualis/*`), the CLI also as `qualis` on npmjs (the `npmjs` job needs the `NPM_TOKEN` secret, a granular token of the npm user `certifie`, or trusted publishing with the `NPMJS_TRUSTED_PUBLISHING` variable set to `true`; without either it is skipped), and the web UI as the `ghcr.io/certifie/qualis-ui` image. When the tag of the current version already exists, nothing is published: bump `version` in `package.json` to release. `node scripts/release/version.mjs` and `node scripts/release/pack.mjs` reproduce the version and the packages locally (output in `release/`).
+The tag is the version: the pipeline writes it into every `package.json` before building, so they do not need to be changed by hand (keeping them on the next version is still a good habit). To release:
+
+```bash
+git checkout main && git pull
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+The pipeline creates the GitHub Release itself: push only the tag, and do not create the release from the GitHub page (a tag whose release already exists publishes nothing). Pushes to branches never publish, and the documentation site is deployed only with a release, so it always matches a published version.
+
+A release contains the `qualis` command with its dependencies (`qualis-X.Y.Z.tar.gz` / `.zip`), the npm tarballs, the documentation site and `SHA256SUMS.txt`. The npm packages are published on npmjs and on GitHub Packages as `@certifie/qualis`, `@certifie/qualis-core`, ... (GitHub Packages requires the owner's scope; the dependencies between them are npm aliases of `@qualis/*`), the CLI also as `qualis` on npmjs (the `npmjs` job needs the `NPM_TOKEN` secret, a granular token of the npm user `certifie`, or trusted publishing with the `NPMJS_TRUSTED_PUBLISHING` variable set to `true`; without either it is skipped), and the web UI as the `ghcr.io/certifie/qualis-ui` image. When a tag's release already exists (a re-run), nothing is published again. `node scripts/release/version.mjs --tag vX.Y.Z` and `node scripts/release/pack.mjs` reproduce the version and the packages locally (output in `release/`).
 
 ## Forks
 
