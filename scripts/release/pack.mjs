@@ -1,6 +1,9 @@
 // Builds the release artifacts into release/ (run after `pnpm build` and `pnpm --filter @qualis/docs build`):
 //
-//   release/npm/*.tgz           the publishable packages, renamed for GitHub Packages (@<owner>/qualis, @<owner>/qualis-core, ...)
+//   release/npm/*.tgz           the publishable packages, scoped with the owner (@<owner>/qualis, @<owner>/qualis-core, ...),
+//                               published both on GitHub Packages and on npmjs (registry.npmjs.org)
+//   release/npmjs/*.tgz         the CLI also as the unscoped "qualis" package, published only on npmjs
+//                               (GitHub Packages rejects unscoped names), so that `npm install --global qualis` works
 //   release/assets/qualis-<version>.tar.gz|.zip   the qualis command with all its dependencies (no registry needed)
 //   release/assets/qualis-docs-<version>.zip     the static documentation site
 //   release/assets/*.tgz, SHA256SUMS.txt          copies of the npm tarballs and the checksums of every asset
@@ -8,6 +11,7 @@
 // GitHub Packages only accepts npm packages scoped with the owner of the repository, so the @qualis/* packages are
 // published as @<owner>/qualis-*. Their dependencies on each other become npm aliases
 // ("@qualis/core": "npm:@<owner>/qualis-core@<version>"), so the code keeps importing @qualis/* unchanged.
+// The tarballs name no registry: the pipeline chooses it when it publishes them.
 //
 //   node scripts/release/pack.mjs [--repo CERTIFIE/qualis]
 import { execFileSync } from "node:child_process";
@@ -25,17 +29,18 @@ const repoUrl = `https://github.com/${owner}/${repoName}`;
 
 const OUT = path.join(root, "release");
 const NPM = path.join(OUT, "npm");
+const NPMJS = path.join(OUT, "npmjs");
 const ASSETS = path.join(OUT, "assets");
 const TMP = path.join(OUT, "tmp");
 rmSync(OUT, { recursive: true, force: true });
-for (const dir of [NPM, ASSETS, TMP]) mkdirSync(dir, { recursive: true });
+for (const dir of [NPM, NPMJS, ASSETS, TMP]) mkdirSync(dir, { recursive: true });
 
 const run = (cmd, args, cwd = root) => execFileSync(cmd, args, { cwd, stdio: ["ignore", "pipe", "inherit"], encoding: "utf8" }).trim();
 const readJson = (file) => JSON.parse(readFileSync(file, "utf8"));
 const version = readJson(path.join(root, "package.json")).version;
 
 /** qualis -> @certifie/qualis, @qualis/core -> @certifie/qualis-core */
-const githubName = (name) => (name.startsWith("@qualis/") ? `${scope}/qualis-${name.slice("@qualis/".length)}` : `${scope}/${name}`);
+const scopedName = (name) => (name.startsWith("@qualis/") ? `${scope}/qualis-${name.slice("@qualis/".length)}` : `${scope}/${name}`);
 
 // 1. npm packages ------------------------------------------------------------------------------------------------
 const packages = [];
@@ -58,24 +63,54 @@ for (const pkg of packages) {
   run("tar", ["-xzf", tgz], work);
   const manifestFile = path.join(work, "package", "package.json");
   const manifest = readJson(manifestFile);
-  manifest.name = githubName(pkg.name);
+  manifest.name = scopedName(pkg.name);
   for (const field of ["dependencies", "optionalDependencies", "peerDependencies"]) {
     for (const [dep, range] of Object.entries(manifest[field] ?? {})) {
-      if (ours.has(dep)) manifest[field][dep] = `npm:${githubName(dep)}@${range.replace(/^[\^~]/, "")}`;
+      if (ours.has(dep)) manifest[field][dep] = `npm:${scopedName(dep)}@${range.replace(/^[\^~]/, "")}`;
     }
   }
   manifest.repository = { type: "git", url: `git+${repoUrl}.git`, directory: pkg.dir };
   manifest.homepage = `https://${owner.toLowerCase()}.github.io/${repoName}/`;
   manifest.bugs = { url: `${repoUrl}/issues` };
-  manifest.publishConfig = { registry: "https://npm.pkg.github.com" };
+  // Scoped packages are private by default on npmjs: these are public (GitHub Packages ignores the field).
+  manifest.publishConfig = { access: "public" };
   // Apache-2.0 section 4: every redistributed package carries the license and the attribution notices.
   for (const file of ["LICENSE", "NOTICE"]) cpSync(path.join(root, file), path.join(work, "package", file));
   if (Array.isArray(manifest.files)) manifest.files = [...new Set([...manifest.files, "LICENSE", "NOTICE"])];
+  // The page of the package on npmjs shows its README.
+  const readme = path.join(work, "package", "README.md");
+  if (!existsSync(readme)) writeFileSync(readme, packageReadme(pkg.name, manifest));
   writeFileSync(manifestFile, `${JSON.stringify(manifest, null, 2)}\n`);
   const packed = run("npm", ["pack", "--json", "--pack-destination", NPM, "./package"], work);
   const filename = JSON.parse(packed)[0].filename;
   cpSync(path.join(NPM, filename), path.join(ASSETS, filename));
   console.log(`npm    ${manifest.name}@${version}  ->  release/npm/${filename}`);
+  if (pkg.name === "qualis") {
+    // The same CLI under its own name, for npmjs only. Its dependencies stay the scoped packages.
+    manifest.name = "qualis";
+    writeFileSync(manifestFile, `${JSON.stringify(manifest, null, 2)}\n`);
+    const unscoped = JSON.parse(run("npm", ["pack", "--json", "--pack-destination", NPMJS, "./package"], work))[0].filename;
+    console.log(`npm    qualis@${version}  ->  release/npmjs/${unscoped}`);
+  }
+}
+
+/** Short README of a package that has none: what it is and where the documentation is. */
+function packageReadme(sourceName, manifest) {
+  const site = `https://${owner.toLowerCase()}.github.io/${repoName}/`;
+  const install =
+    sourceName === "qualis"
+      ? "```bash\nnpm install --global qualis\nqualis analyze\n```\n\nOr as a development dependency of a project: `npm install --save-dev qualis`, then `npx qualis analyze`."
+      : `This package is installed with the \`qualis\` command line (\`npm install --global qualis\`). To use it on its own, install it under its source name, so that the imports work unchanged:\n\n\`\`\`bash\nnpm install ${sourceName}@npm:${manifest.name}\n\`\`\``;
+  return `# ${manifest.name}
+
+${manifest.description ?? "Part of Qualis, open static code analysis."}
+
+${install}
+
+- Documentation: ${site}
+- Source code: ${repoUrl} (\`${manifest.repository.directory}\`)
+- License: Apache-2.0
+`;
 }
 
 // 2. Standalone qualis command ------------------------------------------------------------------------------------

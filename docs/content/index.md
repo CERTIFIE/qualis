@@ -14,7 +14,7 @@ Qualis analyzes the source code of a repository and answers one question for a t
 
 ## From zero to results
 
-1. **[Install the CLI](installation.html)**: download a release and install it with npm.
+1. **[Install the CLI](installation.html)**: `npm install --global qualis`.
 2. **[Analyze a repository](usage.html)**: run `qualis analyze` in the repository root and read the results in the terminal.
 3. **[Add plugins](add-plugins.html)**, if the bundled ones don't cover your languages.
 4. **Use the results**: `.qualis/report.json` follows a [published JSON format](report-format.html), so you can build your own pages or tools on it, or…
