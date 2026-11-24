@@ -8,12 +8,12 @@ uses [Semantic Versioning](https://semver.org/).
 
 ## [1.0.0] - 2026-11-23
 
-The packages in this release carry version `0.1.1` in their `package.json`.
+All packages are published on npmjs at 1.0.0. The release pipeline takes
+the version from the tag, so `package.json` is not bumped.
 
 ### Added
 
-- Publish the packages on npmjs as well as GitHub Packages; 0.1.1 is the
-  first publication on npmjs (#6, #7).
+- Publish the packages on npmjs as well as GitHub Packages (#6, #7).
 - Contributing guide and `NOTICE` with the attribution to Qualis (#4).
 
 ### Changed
